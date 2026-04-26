@@ -1,0 +1,32 @@
+<IfModule mod_rewrite.c>
+    <IfModule mod_negotiation.c>
+        Options -MultiViews -Indexes
+    </IfModule>
+
+    RewriteEngine On
+
+    RewriteRule ^(app|bootstrap|config|database|resources|routes|storage/framework|storage/logs|vendor)(/|$) - [F,L]
+    RewriteRule ^(\.env|artisan|composer\.(json|lock)|package(-lock)?\.json|vite\.config\.js|phpunit\.xml|postcss\.config\.js|tailwind\.config\.js)$ - [F,L]
+
+    RewriteCond %{REQUEST_URI} ^/(css|js|img|build|storage)/(.*)$ [NC]
+    RewriteCond %{DOCUMENT_ROOT}/public/%1/%2 -f
+    RewriteRule ^(css|js|img|build|storage)/(.*)$ public/$1/$2 [L]
+
+    RewriteCond %{REQUEST_URI} ^/(favicon\.ico|robots\.txt)$ [NC]
+    RewriteCond %{DOCUMENT_ROOT}/public/%1 -f
+    RewriteRule ^(favicon\.ico|robots\.txt)$ public/$1 [L]
+
+    RewriteCond %{HTTP:Authorization} .
+    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+    RewriteCond %{HTTP:x-xsrf-token} .
+    RewriteRule .* - [E=HTTP_X_XSRF_TOKEN:%{HTTP:X-XSRF-Token}]
+
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_URI} (.+)/$
+    RewriteRule ^ %1 [L,R=301]
+
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^ index.php [L]
+</IfModule>

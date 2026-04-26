@@ -1,0 +1,40 @@
+#calender .day {
+	height: 30px;
+}
+
+#calender .picker-switch{
+	height: 50px;
+}
+
+#calender .picker-switch:hover{
+	background: #111827;
+}
+
+#calender .bootstrap-datetimepicker-widget table thead tr:first-child th:hover{
+	background: #101624;
+}
+
+#calender td.day:hover,
+#calender span.month:hover,
+#calender span.year:hover{
+	background: #101624;
+}
+
+#calender .prev,
+#calender .next{
+	color: #fff;
+}
+
+#calender .prev,
+#calender .prev:hover{
+	background-image: url(../img/chevron-back-outline.svg) !important;
+	background-repeat: no-repeat !important;
+	background-position: center !important;
+}
+
+#calender .next,
+#calender .next:hover{
+	background-image: url(../img/chevron-forward-outline.svg) !important;
+	background-repeat: no-repeat !important;
+	background-position: center !important;
+}

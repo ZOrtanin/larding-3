@@ -124,8 +124,3 @@ This public release is being published to collect early feedback on:
 
 If you test this build and notice problems or architectural issues, that feedback is especially valuable at this stage.
 
-## License
-
-This release is published for evaluation and development feedback.
-
-If you plan to distribute or commercialize Larding CMS further, define and add the final license in the next public iteration.

@@ -1,59 +1,127 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
-
 <p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
+  <img src="public/img/logo.svg" alt="Larding CMS" width="180">
 </p>
 
-## About Laravel
+# Larding CMS 3.0.0
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+Larding CMS is a lightweight Laravel-based CMS for landing pages, small corporate websites, and custom client projects.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+This release includes a web installer, block-based page management, lead collection, file management, roles, and an admin panel that can be deployed on standard PHP hosting.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Release Status
 
-## Learning Laravel
+`Larding 3.0.0` is the first public release build of the project.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+This package is intended as a ready-to-install distribution:
+- production `vendor` is already included
+- install wizard is included
+- no Node.js is required on the hosting itself
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## Main Features
 
-## Laravel Sponsors
+- Web installer available at `/install`
+- Block-based landing page structure
+- Admin panel for content management
+- Lead form handling
+- File manager
+- User roles with super-admin support
+- Seeded starter content for a fresh installation
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+## Server Requirements
 
-### Premium Partners
+- PHP `8.2+`
+- MySQL `8+` or compatible MariaDB
+- PHP extensions:
+  - `pdo`
+  - `pdo_mysql`
+  - `mbstring`
+  - `openssl`
+  - `fileinfo`
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+The installer also requires write access to:
 
-## Contributing
+- `storage/`
+- `bootstrap/cache/`
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## Installation
 
-## Code of Conduct
+### 1. Upload files
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Upload the contents of this package to your hosting.
 
-## Security Vulnerabilities
+If your hosting allows changing `DocumentRoot`, point it to `public/`.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+If your hosting does not allow changing `DocumentRoot`, this release is already prepared for root-level launch and includes:
+
+- root `index.php`
+- root `.htaccess`
+
+That means the package can be placed directly into the public web directory.
+
+### 2. Prepare environment
+
+Create `.env` from `.env.example`:
+
+```bash
+cp .env.example .env
+```
+
+Set at least:
+
+- `APP_ENV=production`
+- `APP_DEBUG=false`
+- `APP_INSTALLED=false`
+- your `DB_*` connection values
+
+Do not mark the application as installed before running the installer.
+
+### 3. Open installer
+
+Open your site in the browser:
+
+```text
+https://your-domain/install
+```
+
+Installation flow:
+
+1. Requirements check
+2. Database configuration
+3. Database initialization
+4. First administrator creation
+
+After a successful install, the application writes the final settings and marks itself as installed.
+
+## Notes About Hosting
+
+- Node.js is not required on the production hosting
+- front-end assets are already included in the package
+- this build is intended for standard shared hosting or a simple VPS setup
+
+## Project Structure
+
+- `app/`, `bootstrap/`, `config/`, `database/`, `resources/`, `routes/`:
+  application source
+- `public/`:
+  public assets
+- `vendor/`:
+  production PHP dependencies
+- `storage/`:
+  runtime files and logs
+
+## First Public Release
+
+This public release is being published to collect early feedback on:
+
+- installer behavior
+- hosting compatibility
+- release packaging
+- usability of the CMS core
+
+If you test this build and notice problems or architectural issues, that feedback is especially valuable at this stage.
 
 ## License
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+This release is published for evaluation and development feedback.
+
+If you plan to distribute or commercialize Larding CMS further, define and add the final license in the next public iteration.

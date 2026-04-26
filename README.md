@@ -2,6 +2,10 @@
   <img src="public/img/logo.svg" alt="Larding CMS" width="180">
 </p>
 
+<p align="center">
+  <a href="./README.md">English</a> | <a href="./README.ru.md">Русский</a>
+</p>
+
 # Larding CMS 3.0.0
 
 Larding CMS is a lightweight Laravel-based CMS for landing pages, small corporate websites, and custom client projects.

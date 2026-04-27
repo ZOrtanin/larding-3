@@ -10,6 +10,15 @@ use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 
 if (! function_exists('ensureAppKeyExists')) {
+    function ensureEnvironmentFileExists(string $envPath, string $examplePath): void
+    {
+        if (file_exists($envPath) || ! file_exists($examplePath)) {
+            return;
+        }
+
+        copy($examplePath, $envPath);
+    }
+
     function ensureAppKeyExists(string $envPath): void
     {
         if (! file_exists($envPath) || ! is_writable($envPath)) {
@@ -36,6 +45,11 @@ if (! function_exists('ensureAppKeyExists')) {
         $_SERVER['APP_KEY'] = $key;
     }
 }
+
+ensureEnvironmentFileExists(
+    dirname(__DIR__).'/.env',
+    dirname(__DIR__).'/.env.example',
+);
 
 ensureAppKeyExists(dirname(__DIR__).'/.env');
 

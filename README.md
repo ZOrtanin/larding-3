@@ -64,7 +64,9 @@ That means the package can be placed directly into the public web directory.
 
 ### 2. Prepare environment
 
-Create `.env` from `.env.example`:
+If `.env` is missing, the release will create it automatically from `.env.example` on first run.
+
+You can also create it manually:
 
 ```bash
 cp .env.example .env
@@ -123,4 +125,3 @@ This public release is being published to collect early feedback on:
 - usability of the CMS core
 
 If you test this build and notice problems or architectural issues, that feedback is especially valuable at this stage.
-

@@ -12,6 +12,10 @@ Larding CMS is a lightweight Laravel-based CMS for landing pages, small corporat
 
 This release includes a web installer, block-based page management, lead collection, file management, roles, and an admin panel that can be deployed on standard PHP hosting.
 
+## Demo
+
+- [https://larding.ru](https://larding.ru)
+
 ## Release Status
 
 `Larding 3.0.0` is the first public release build of the project.
@@ -103,6 +107,14 @@ After a successful install, the application writes the final settings and marks 
 - Node.js is not required on the production hosting
 - front-end assets are already included in the package
 - this build is intended for standard shared hosting or a simple VPS setup
+
+## Tested Hosting
+
+The CMS has currently been tested on:
+
+- `masterhost.ru`
+
+This list will be expanded as more hosting providers are verified.
 
 ## Project Structure
 

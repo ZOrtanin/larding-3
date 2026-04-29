@@ -11,25 +11,18 @@
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
-        <link href="{{ asset('public/css/main.css') }}" rel="stylesheet">
+        <link href="{{ asset('css/main.css') }}" rel="stylesheet">
         <!-- <link href="{{ asset('css/app.css') }}" rel="stylesheet">
         <script src="{{ asset('js/app.js') }}" defer></script> -->
         <!-- Scripts -->
-        <link href="{{ asset('public/js/lib/tempusdominus/css/tempusdominus-bootstrap-4.min.css') }}" rel="stylesheet">
+        <link href="{{ asset('js/lib/tempusdominus/css/tempusdominus-bootstrap-4.min.css') }}" rel="stylesheet">
         <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
-        <script src="{{ asset('public/js/lib/tempusdominus/js/moment.min.js') }}" defer></script>
-        <script src="{{ asset('public/js/lib/tempusdominus/js/moment-timezone.min.js') }}" defer></script>
-        <script src="{{ asset('public/js/lib/tempusdominus/js/tempusdominus-bootstrap-4.min.js') }}" defer></script>
-        <script src="{{ asset('public/js/main.js') }}" defer></script>
-
-        <!--- {{ file_exists(public_path('build/manifest.json')) }}  {{ file_exists(public_path('hot')) }} -->
-
-        @if (file_exists(public_path('build/manifest.json_')) || file_exists(public_path('hot_')))
-            @vite(['resources/css/app.css', 'resources/js/app.js'])
-        @else
-            <link href="{{ asset('public/build/assets/app.css') }}" rel="stylesheet">
-            <script src="{{ asset('public/build/assets/app.js') }}" defer></script>
-        @endif
+        <script src="{{ asset('js/lib/tempusdominus/js/moment.min.js') }}" defer></script>
+        <script src="{{ asset('js/lib/tempusdominus/js/moment-timezone.min.js') }}" defer></script>
+        <script src="{{ asset('js/lib/tempusdominus/js/tempusdominus-bootstrap-4.min.js') }}" defer></script>
+        <script src="{{ asset('js/main.js') }}" defer></script>
+        
+        @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body class="font-sans antialiased">
         <div class="min-h-screen bg-gray-100 dark:bg-gray-900">
@@ -37,8 +30,8 @@
             @guest
                 
             @else
-                <script src="{{ asset('public/js/lib/chart/chart.min.js') }}" defer></script>
-                <script src="{{ asset('public/js/admin.js') }}" defer></script>
+                <script src="{{ asset('js/lib/chart/chart.min.js') }}" defer></script>
+                <script src="{{ asset('js/admin.js') }}" defer></script>
                 <input type="hidden" id="url_block_create" value="{{ route('settings.create') }}">
                 <input type="hidden" id="url_block_show" value="{{ route('settings.blocks.show', ['block' => '__BLOCK__']) }}">
                 <input type="hidden" id="url_block_templates" value="{{ route('settings.templates.index') }}">

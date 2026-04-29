@@ -1,9 +1,9 @@
 <?php return array(
     'root' => array(
-        'name' => 'laravel/laravel',
+        'name' => 'larding/cms',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-        'reference' => '236c94de6a1df1b97aef378994c522bd990d57e5',
+        'reference' => '0d30f4d2c6ca566c32335a1cc7194a480890ba3a',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -361,15 +361,6 @@
             'aliases' => array(),
             'dev_requirement' => false,
         ),
-        'laravel/laravel' => array(
-            'pretty_version' => 'dev-main',
-            'version' => 'dev-main',
-            'reference' => '236c94de6a1df1b97aef378994c522bd990d57e5',
-            'type' => 'project',
-            'install_path' => __DIR__ . '/../../',
-            'aliases' => array(),
-            'dev_requirement' => false,
-        ),
         'laravel/prompts' => array(
             'pretty_version' => 'v0.3.13',
             'version' => '0.3.13.0',
@@ -394,6 +385,15 @@
             'reference' => 'c9f80cc835649b5c1842898fb043f8cc098dd741',
             'type' => 'library',
             'install_path' => __DIR__ . '/../laravel/tinker',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
+        'larding/cms' => array(
+            'pretty_version' => 'dev-main',
+            'version' => 'dev-main',
+            'reference' => '0d30f4d2c6ca566c32335a1cc7194a480890ba3a',
+            'type' => 'project',
+            'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
             'dev_requirement' => false,
         ),

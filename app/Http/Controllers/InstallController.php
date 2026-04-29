@@ -133,7 +133,6 @@ class InstallController extends Controller
             'DB_USERNAME' => $validated['username'],
             'DB_PASSWORD' => (string) ($validated['password'] ?? ''),
         ]);
-
         Artisan::call('config:clear');
 
         $request->session()->put('install.database_configured', true);
@@ -166,17 +165,12 @@ class InstallController extends Controller
     public function runInitialization(Request $request): RedirectResponse
     {
         if (! $request->session()->get('install.database_configured')) {
-            //echo $request;
             return redirect()->route('install.database');
-            //return $request;
         }
 
         $this->installationRunner->initializeDatabase();
 
         $request->session()->put('install.initialized', true);
-
-
-
         return redirect()
             ->route('install.admin')
             ->with('status', 'installation-initialized');

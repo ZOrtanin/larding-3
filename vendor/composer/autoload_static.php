@@ -502,6 +502,7 @@ class ComposerStaticInita604a19f9b48703165d77459ee5cd4fe
         'App\\Http\\Controllers\\UserController' => __DIR__ . '/../..' . '/app/Http/Controllers/UserController.php',
         'App\\Http\\Middleware\\AuthenticateWithApiToken' => __DIR__ . '/../..' . '/app/Http/Middleware/AuthenticateWithApiToken.php',
         'App\\Http\\Middleware\\EnsureApplicationIsInstalled' => __DIR__ . '/../..' . '/app/Http/Middleware/EnsureApplicationIsInstalled.php',
+        'App\\Http\\Middleware\\EnsureApplicationIsNotInstalled' => __DIR__ . '/../..' . '/app/Http/Middleware/EnsureApplicationIsNotInstalled.php',
         'App\\Http\\Middleware\\EnsureUserHasAssignedRole' => __DIR__ . '/../..' . '/app/Http/Middleware/EnsureUserHasAssignedRole.php',
         'App\\Http\\Middleware\\EnsureUserHasRole' => __DIR__ . '/../..' . '/app/Http/Middleware/EnsureUserHasRole.php',
         'App\\Http\\Middleware\\TrackVisit' => __DIR__ . '/../..' . '/app/Http/Middleware/TrackVisit.php',

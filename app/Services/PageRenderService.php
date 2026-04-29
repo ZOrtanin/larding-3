@@ -32,7 +32,7 @@ class PageRenderService
         $viewButtonClass = $isVisible ? 'bg-orange-500' : 'bg-gray-500';
 
         $html = '<div class="js-block-edit relative" data-block-id="'.$blockId.'" data-visible="'.($isVisible ? '1' : '0').'">';
-        $html .= $this->replaceBlockPlaceholders((string) $block['data'], $blockId);
+        $html .= $this->replaceBlockPlaceholders((string) $block['data'], $blockId, $isAdmin);
 
         if ($isAdmin) {
             $html .= $this->renderAdminControls($blockId, $viewButtonClass);
@@ -53,11 +53,20 @@ class PageRenderService
     }
 
     // Подставляет служебные плейсхолдеры в шаблон блока.
-    private function replaceBlockPlaceholders(string $html, int $blockId): string
+    private function replaceBlockPlaceholders(string $html, int $blockId, bool $isAdmin): string
     {
         $html = str_replace('{{ $block_id }}', (string) $blockId, $html);
+        $html = str_replace('{{ $site_url }}', config('app.url'), $html);
 
-        return str_replace('{{ $site_url }}', 'http://localhost:8001', $html);
+        // Принудительно устанавливаем display:block для блоков первого уровня при рендере с админскими правами
+        if ($isAdmin) {
+            // Используем регулярное выражение, чтобы заменить style="display:none;" только в внешних div-блоках
+            $html = preg_replace_callback('/<div([^>]*)style="display:\s*none;?"([^>]*)>/i', function($matches) {
+                return '<div' . $matches[1] . 'style="display:block;"' . $matches[2] . '>';
+            }, $html);
+        }
+
+        return $html;
     }
 
     // Возвращает HTML админских кнопок управления блоком.

@@ -18,13 +18,15 @@ Route::get('/index', function () {
     return view('welcome');
 });
 
-Route::get('/install', [InstallController::class, 'index'])->name('install.index');
-Route::get('/install/database', [InstallController::class, 'database'])->name('install.database');
-Route::post('/install/database', [InstallController::class, 'storeDatabase'])->name('install.database.store');
-Route::get('/install/initialize', [InstallController::class, 'initialize'])->name('install.initialize');
-Route::post('/install/initialize', [InstallController::class, 'runInitialization'])->name('install.initialize.run');
-Route::get('/install/admin', [InstallController::class, 'admin'])->name('install.admin');
-Route::post('/install/admin', [InstallController::class, 'storeAdmin'])->name('install.admin.store');
+Route::middleware('not_installed')->group(function (): void {
+    Route::get('/install', [InstallController::class, 'index'])->name('install.index');
+    Route::get('/install/database', [InstallController::class, 'database'])->name('install.database');
+    Route::post('/install/database', [InstallController::class, 'storeDatabase'])->name('install.database.store');
+    Route::get('/install/initialize', [InstallController::class, 'initialize'])->name('install.initialize');
+    Route::post('/install/initialize', [InstallController::class, 'runInitialization'])->name('install.initialize.run');
+    Route::get('/install/admin', [InstallController::class, 'admin'])->name('install.admin');
+    Route::post('/install/admin', [InstallController::class, 'storeAdmin'])->name('install.admin.store');
+});
 
 // Публичная главная страница сайта.
 Route::get('/', [IndexController::class, 'index'])->name('template.index');

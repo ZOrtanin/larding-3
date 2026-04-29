@@ -33,6 +33,7 @@ return array(
     'App\\Http\\Controllers\\UserController' => $baseDir . '/app/Http/Controllers/UserController.php',
     'App\\Http\\Middleware\\AuthenticateWithApiToken' => $baseDir . '/app/Http/Middleware/AuthenticateWithApiToken.php',
     'App\\Http\\Middleware\\EnsureApplicationIsInstalled' => $baseDir . '/app/Http/Middleware/EnsureApplicationIsInstalled.php',
+    'App\\Http\\Middleware\\EnsureApplicationIsNotInstalled' => $baseDir . '/app/Http/Middleware/EnsureApplicationIsNotInstalled.php',
     'App\\Http\\Middleware\\EnsureUserHasAssignedRole' => $baseDir . '/app/Http/Middleware/EnsureUserHasAssignedRole.php',
     'App\\Http\\Middleware\\EnsureUserHasRole' => $baseDir . '/app/Http/Middleware/EnsureUserHasRole.php',
     'App\\Http\\Middleware\\TrackVisit' => $baseDir . '/app/Http/Middleware/TrackVisit.php',

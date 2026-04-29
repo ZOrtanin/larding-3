@@ -2,6 +2,7 @@
 
 use App\Http\Middleware\AuthenticateWithApiToken;
 use App\Http\Middleware\EnsureApplicationIsInstalled;
+use App\Http\Middleware\EnsureApplicationIsNotInstalled;
 use App\Http\Middleware\EnsureUserHasAssignedRole;
 use App\Http\Middleware\EnsureUserHasRole;
 use App\Http\Middleware\TrackVisit;
@@ -64,6 +65,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'api.token' => AuthenticateWithApiToken::class,
             'installed' => EnsureApplicationIsInstalled::class,
+            'not_installed' => EnsureApplicationIsNotInstalled::class,
             'role.assigned' => EnsureUserHasAssignedRole::class,
             'role' => EnsureUserHasRole::class,
         ]);

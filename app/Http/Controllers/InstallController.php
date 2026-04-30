@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Services\DatabaseConnectionValidator;
+use App\Services\CmsUpdateService;
 use App\Services\EnvironmentFileEditor;
 use App\Services\InstallationRunner;
 use App\Services\InstallationState;
@@ -125,6 +126,12 @@ class InstallController extends Controller
             ]);
         }
 
+        if ($this->databaseConnectionValidator->databaseContainsInstalledCms($validated)) {
+            throw ValidationException::withMessages([
+                'database' => 'В указанной базе уже установлена CMS. Используйте пустую базу данных или выполните обновление существующей установки.',
+            ]);
+        }
+
         $this->environmentFileEditor->update([
             'DB_CONNECTION' => $validated['connection'],
             'DB_HOST' => $validated['host'],
@@ -227,6 +234,7 @@ class InstallController extends Controller
         ]);
 
         Setting::setValue(InstallationState::INSTALLED_KEY, '1');
+        Setting::setValue(CmsUpdateService::VERSION_KEY, config('cms.version'));
 
         $this->environmentFileEditor->update([
             'APP_URL' => (string) $request->session()->get('install.database.app_url', config('app.url')),

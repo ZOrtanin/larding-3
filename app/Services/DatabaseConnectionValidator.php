@@ -10,6 +10,31 @@ class DatabaseConnectionValidator
 {
     public function validate(array $config): void
     {
+        $pdo = $this->connect($config);
+
+        if (! $pdo instanceof PDO) {
+            return;
+        }
+    }
+
+    public function databaseContainsInstalledCms(array $config): bool
+    {
+        $pdo = $this->connect($config);
+
+        try {
+            $statement = $pdo->prepare('SELECT `value` FROM `settings` WHERE `key` = :key LIMIT 1');
+            $statement->execute([
+                'key' => 'app.installed',
+            ]);
+
+            return $statement->fetchColumn() === '1';
+        } catch (PDOException) {
+            return false;
+        }
+    }
+
+    private function connect(array $config): PDO
+    {
         $driver = (string) ($config['connection'] ?? 'mysql');
 
         $dsn = match ($driver) {
@@ -36,7 +61,7 @@ class DatabaseConnectionValidator
         };
 
         try {
-            new PDO($dsn, (string) $config['username'], (string) $config['password'], [
+            return new PDO($dsn, (string) $config['username'], (string) $config['password'], [
                 PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
                 PDO::ATTR_TIMEOUT => 5,
             ]);

@@ -519,6 +519,7 @@ class ComposerStaticInita604a19f9b48703165d77459ee5cd4fe
         'App\\Models\\User' => __DIR__ . '/../..' . '/app/Models/User.php',
         'App\\Models\\Visit' => __DIR__ . '/../..' . '/app/Models/Visit.php',
         'App\\Providers\\AppServiceProvider' => __DIR__ . '/../..' . '/app/Providers/AppServiceProvider.php',
+        'App\\Services\\CmsUpdateService' => __DIR__ . '/../..' . '/app/Services/CmsUpdateService.php',
         'App\\Services\\DatabaseConnectionValidator' => __DIR__ . '/../..' . '/app/Services/DatabaseConnectionValidator.php',
         'App\\Services\\EnvironmentFileEditor' => __DIR__ . '/../..' . '/app/Services/EnvironmentFileEditor.php',
         'App\\Services\\InstallationRunner' => __DIR__ . '/../..' . '/app/Services/InstallationRunner.php',

@@ -50,6 +50,7 @@ return array(
     'App\\Models\\User' => $baseDir . '/app/Models/User.php',
     'App\\Models\\Visit' => $baseDir . '/app/Models/Visit.php',
     'App\\Providers\\AppServiceProvider' => $baseDir . '/app/Providers/AppServiceProvider.php',
+    'App\\Services\\CmsUpdateService' => $baseDir . '/app/Services/CmsUpdateService.php',
     'App\\Services\\DatabaseConnectionValidator' => $baseDir . '/app/Services/DatabaseConnectionValidator.php',
     'App\\Services\\EnvironmentFileEditor' => $baseDir . '/app/Services/EnvironmentFileEditor.php',
     'App\\Services\\InstallationRunner' => $baseDir . '/app/Services/InstallationRunner.php',

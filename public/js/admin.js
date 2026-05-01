@@ -284,6 +284,8 @@ function initLeadTableActions() {
 function initBlockEditor() {
     const blockForm = document.getElementById('block-form');
     const drawer = document.getElementById('drawer');
+    const drawerPanel = document.getElementById('block-editor-panel');
+    const resizeHandle = document.getElementById('block-editor-resize-handle');
     const drawerTitle = document.getElementById('drawer-title');
     const drawerCloseButton = document.getElementById('drawer-close-button');
     const submitButton = document.getElementById('block-submit-button');
@@ -302,6 +304,8 @@ function initBlockEditor() {
     if (!blockForm || !drawer || !drawerTitle || !submitButton || !methodInput || !nameInput || !descriptionInput || !contentInput) {
         return;
     }
+
+    initBlockEditorResize(drawerPanel, resizeHandle);
 
     function openDrawer() {
         if (typeof drawer.showModal === 'function' && !drawer.open) {
@@ -445,6 +449,9 @@ function initBlockEditor() {
         nameInput.value = block.name ?? '';
         descriptionInput.value = block.description ?? '';
         contentInput.value = block.content ?? '';
+        contentInput.dispatchEvent(new CustomEvent('block-editor:update', {
+            detail: { value: contentInput.value },
+        }));
         fillVariables(block.variables ?? []);
     }
 
@@ -650,6 +657,94 @@ function initBlockEditor() {
     });
 
     loadTemplates();
+}
+
+function initBlockEditorResize(drawerPanel, resizeHandle) {
+    if (!drawerPanel || !resizeHandle) {
+        return;
+    }
+
+    const storageKey = 'larding:block-editor-width';
+    const minWidth = 420;
+    const defaultWidth = 448;
+    const maxWidthOffset = 96;
+    let isResizing = false;
+    let activePointerId = null;
+
+    function maxWidth() {
+        return Math.max(minWidth, window.innerWidth - maxWidthOffset);
+    }
+
+    function clampWidth(width) {
+        return Math.min(Math.max(width, minWidth), maxWidth());
+    }
+
+    function applyWidth(width) {
+        const normalizedWidth = clampWidth(width);
+        drawerPanel.style.maxWidth = 'none';
+        drawerPanel.style.width = normalizedWidth + 'px';
+    }
+
+    const storedWidth = Number.parseInt(window.localStorage.getItem(storageKey) || '', 10);
+    applyWidth(Number.isFinite(storedWidth) ? storedWidth : defaultWidth);
+
+    function startResize(event) {
+        if (event.button !== undefined && event.button !== 0) {
+            return;
+        }
+
+        isResizing = true;
+        activePointerId = event.pointerId ?? null;
+        document.body.style.userSelect = 'none';
+        document.body.style.cursor = 'col-resize';
+        event.preventDefault();
+
+        if (activePointerId !== null && typeof resizeHandle.setPointerCapture === 'function') {
+            resizeHandle.setPointerCapture(activePointerId);
+        }
+    }
+
+    resizeHandle.addEventListener('pointerdown', startResize);
+
+    document.addEventListener('pointermove', function (event) {
+        if (!isResizing || (activePointerId !== null && event.pointerId !== activePointerId)) {
+            return;
+        }
+
+        const width = window.innerWidth - event.clientX;
+        applyWidth(width);
+    });
+
+    function stopResize(event) {
+        if (!isResizing) {
+            return;
+        }
+
+        if (activePointerId !== null && event?.pointerId !== undefined && event.pointerId !== activePointerId) {
+            return;
+        }
+
+        isResizing = false;
+        if (activePointerId !== null && typeof resizeHandle.releasePointerCapture === 'function') {
+            try {
+                resizeHandle.releasePointerCapture(activePointerId);
+            } catch (error) {
+                // ignore missing capture state
+            }
+        }
+        activePointerId = null;
+        document.body.style.userSelect = '';
+        document.body.style.cursor = '';
+        window.localStorage.setItem(storageKey, String(Math.round(drawerPanel.getBoundingClientRect().width)));
+    }
+
+    document.addEventListener('pointerup', stopResize);
+    document.addEventListener('pointercancel', stopResize);
+
+    window.addEventListener('resize', function () {
+        const currentWidth = drawerPanel.getBoundingClientRect().width || defaultWidth;
+        applyWidth(currentWidth);
+    });
 }
 
 function initDataModal(config) {

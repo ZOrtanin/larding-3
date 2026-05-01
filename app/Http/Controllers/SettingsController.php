@@ -7,6 +7,7 @@ use App\Services\CmsUpdateService;
 use App\Services\MailSettingsService;
 use App\Mail\TestMailSettingsMail;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Redirect;
@@ -14,6 +15,8 @@ use Illuminate\View\View;
 
 class SettingsController extends Controller
 {
+    private const UPDATE_STATE_SESSION_KEY = 'cms_update_state';
+
     // Ключи настроек сайта, которые сохраняются в таблицу settings.
     private const SETTINGS_KEYS = [
         'site_name',
@@ -34,7 +37,10 @@ class SettingsController extends Controller
     // Открывает страницу настроек и подставляет сохранённые значения.
     public function edit(Request $request): View {
         $settings = $this->loadSettings();
-        $updateState = $this->loadUpdateState(app(CmsUpdateService::class));
+        $updateState = $this->loadUpdateState(
+            app(CmsUpdateService::class),
+            $request->session()->get(self::UPDATE_STATE_SESSION_KEY, []),
+        );
 
         return view('settings.edit', [
             'user' => $request->user(),
@@ -105,7 +111,15 @@ class SettingsController extends Controller
             $latestRelease = $cmsUpdateService->latestRelease();
 
             if ($latestRelease === null || ! $cmsUpdateService->remoteUpdateAvailable()) {
-                return Redirect::route('settings.edit')->with('status', 'cms-update-not-available');
+                return Redirect::route('settings.edit')
+                    ->with('status', 'cms-update-not-available')
+                    ->with(self::UPDATE_STATE_SESSION_KEY, [
+                        'latest_version' => $latestRelease['version'] ?? null,
+                        'archive_url' => $latestRelease['url'] ?? null,
+                        'update_available' => false,
+                        'manifest_error' => null,
+                        'checked_at' => now()->toDateTimeString(),
+                    ]);
             }
 
             $cmsUpdateService->updateFromArchiveUrl(
@@ -117,6 +131,60 @@ class SettingsController extends Controller
             return Redirect::route('settings.edit')->with('status', 'cms-updated');
         } catch (\Throwable $exception) {
             return Redirect::route('settings.edit')
+                ->with(self::UPDATE_STATE_SESSION_KEY, [
+                    'latest_version' => null,
+                    'archive_url' => null,
+                    'update_available' => false,
+                    'manifest_error' => $exception->getMessage(),
+                    'checked_at' => now()->toDateTimeString(),
+                ])
+                ->with('cms_update_error', $exception->getMessage());
+        }
+    }
+
+    public function checkCmsUpdate(Request $request, CmsUpdateService $cmsUpdateService): RedirectResponse|JsonResponse
+    {
+        try {
+            $latestRelease = $cmsUpdateService->latestRelease();
+
+            $state = [
+                'latest_version' => $latestRelease['version'] ?? null,
+                'archive_url' => $latestRelease['url'] ?? null,
+                'update_available' => $latestRelease !== null
+                    ? $cmsUpdateService->remoteUpdateAvailable()
+                    : false,
+                'manifest_error' => null,
+                'checked_at' => now()->toDateTimeString(),
+            ];
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message' => 'Проверка обновлений завершена.',
+                    'state' => $state,
+                ]);
+            }
+
+            return Redirect::route('settings.edit')
+                ->with('status', 'cms-update-checked')
+                ->with(self::UPDATE_STATE_SESSION_KEY, $state);
+        } catch (\Throwable $exception) {
+            $state = [
+                'latest_version' => null,
+                'archive_url' => null,
+                'update_available' => false,
+                'manifest_error' => $exception->getMessage(),
+                'checked_at' => now()->toDateTimeString(),
+            ];
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message' => $exception->getMessage(),
+                    'state' => $state,
+                ], 422);
+            }
+
+            return Redirect::route('settings.edit')
+                ->with(self::UPDATE_STATE_SESSION_KEY, $state)
                 ->with('cms_update_error', $exception->getMessage());
         }
     }
@@ -150,29 +218,16 @@ class SettingsController extends Controller
         return $defaults;
     }
 
-    private function loadUpdateState(CmsUpdateService $cmsUpdateService): array
+    private function loadUpdateState(CmsUpdateService $cmsUpdateService, array $storedState = []): array
     {
-        $state = [
+        return array_merge([
             'current_version' => $cmsUpdateService->currentVersion(),
             'installed_version' => $cmsUpdateService->installedVersion() ?? 'unknown',
             'latest_version' => null,
             'archive_url' => null,
             'update_available' => false,
             'manifest_error' => null,
-        ];
-
-        try {
-            $latestRelease = $cmsUpdateService->latestRelease();
-
-            if ($latestRelease !== null) {
-                $state['latest_version'] = $latestRelease['version'];
-                $state['archive_url'] = $latestRelease['url'];
-                $state['update_available'] = $cmsUpdateService->remoteUpdateAvailable();
-            }
-        } catch (\Throwable $exception) {
-            $state['manifest_error'] = $exception->getMessage();
-        }
-
-        return $state;
+            'checked_at' => null,
+        ], $storedState);
     }
 }

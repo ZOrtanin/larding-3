@@ -49,7 +49,10 @@
                 <el-dialog-backdrop class="absolute inset-0 bg-gray-900/50 transition-opacity duration-500 ease-in-out data-closed:opacity-0"></el-dialog-backdrop>
 
                 <div tabindex="0" class="absolute inset-0 pl-10 focus:outline-none sm:pl-16">
-                  <el-dialog-panel class="group/dialog-panel relative ml-auto block size-full max-w-md transform transition duration-500 ease-in-out data-closed:translate-x-full sm:duration-700">
+                  <el-dialog-panel id="block-editor-panel" class="group/dialog-panel relative ml-auto block h-full w-full max-w-md transform transition duration-500 ease-in-out data-closed:translate-x-full sm:duration-700">
+                    <div id="block-editor-resize-handle" class="absolute inset-y-0 left-0 z-20  w-5 -translate-x-1/2 cursor-col-resize" title="Потяните, чтобы изменить ширину редактора">
+                      <div class="absolute inset-y-8 left-1/2 h-[100px] w-1 -translate-x-1/2 rounded-full bg-white/20 transition group-hover/dialog-panel:bg-orange-400/80 my-auto"></div>
+                    </div>
                     <!-- Close button, show/hide based on slide-over state. -->
                     <div class="absolute top-0 left-0 -ml-8 flex pt-4 pr-2 duration-500 ease-in-out group-data-closed/dialog-panel:opacity-0 sm:-ml-10 sm:pr-4">
                       <button id="drawer-close-button" type="button" class="relative rounded-md text-gray-400 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500">
@@ -76,7 +79,7 @@
 
 
                          
-                            <div class="sm:col-span-3">
+                            <div class="sm:col-span-3 mb-3">
                               <label for="block-template-select" class="block text-sm/6 font-medium text-white">Шаблон блока</label>
                               <div class="mt-2 flex items-center gap-2">
                                 <select id="block-template-select" class="block w-full rounded-md bg-white/5 px-3 py-1.5 text-base text-white outline-1 -outline-offset-1 outline-white/10 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6">
@@ -87,24 +90,30 @@
                               <p class="mt-2 text-xs text-gray-400">Подставляет название, описание и контент в форму.</p>
                             </div>
 
-                            <div class="sm:col-span-3">
+                            <div class="sm:col-span-3 mb-3">
                               <label for="block-name" class="block text-sm/6 font-medium text-white">Имя блока</label>
                               <div class="mt-2">
                                 <input id="block-name" type="text" name="name" autocomplete="given-name" class="block w-full rounded-md bg-white/5 px-3 py-1.5 text-base text-white outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6" />
                               </div>
                             </div>
 
-                            <div class="sm:col-span-3">
+                            <div class="sm:col-span-3 mb-3">
                               <label for="block-description" class="block text-sm/6 font-medium text-white">Описание блока</label>
                               <div class="mt-2">
                                 <input id="block-description" type="text" name="description" autocomplete="given-description" class="block w-full rounded-md bg-white/5 px-3 py-1.5 text-base text-white outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6" />
                               </div>
                             </div>
 
-                            <div class="col-span-full">
-                              <label for="block-content" class="block text-sm/6 font-medium text-white">Контент</label>
+                            <div class="col-span-full mb-3">
+                              <div class="flex items-center justify-between gap-4">
+                                <label for="block-content" class="block text-sm/6 font-medium text-white">Контент</label>
+                                <label class="inline-flex items-center gap-2 text-xs text-gray-300">
+                                  <input id="block-content-line-wrapping" type="checkbox" class="rounded border-white/10 bg-white/5 text-orange-500 focus:ring-orange-500" checked />
+                                  Перенос строк
+                                </label>
+                              </div>
                               <div class="mt-2">
-                                <textarea id="block-content" name="content" rows="3" class="block w-full rounded-md bg-white/5 px-3 py-1.5 text-base text-white outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6"></textarea>
+                                <textarea id="block-content" name="content" rows="13" class="block w-full rounded-md bg-white/5 px-3 py-1.5 text-base text-white outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6"></textarea>
                               </div>
                               <p class="mt-3 text-sm/6 text-gray-400">Write a few sentences about yourself.</p>
                             </div>

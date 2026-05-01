@@ -3,7 +3,7 @@
         'name' => 'larding/cms',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-        'reference' => '315d45050db0cb091f603c6aac80e80af7e50f17',
+        'reference' => '5b447722989ed2b27b6f3fc832d2829cf59b0835',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -391,7 +391,7 @@
         'larding/cms' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => '315d45050db0cb091f603c6aac80e80af7e50f17',
+            'reference' => '5b447722989ed2b27b6f3fc832d2829cf59b0835',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),

@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'version' => env('CMS_VERSION', '3.0.3'),
+    'version' => env('CMS_VERSION', '3.0.5'),
 
     'update_manifest_url' => env('CMS_UPDATE_MANIFEST_URL', 'http://renewal.larding.ru/version.json'),
 

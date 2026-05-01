@@ -11,17 +11,13 @@
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
-        <link href="{{ asset('css/main.css') }}" rel="stylesheet">
-        <!-- <link href="{{ asset('css/app.css') }}" rel="stylesheet">
-        <script src="{{ asset('js/app.js') }}" defer></script> -->
-        <!-- Scripts -->
+
         <link href="{{ asset('js/lib/tempusdominus/css/tempusdominus-bootstrap-4.min.css') }}" rel="stylesheet">
         <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
         <script src="{{ asset('js/lib/tempusdominus/js/moment.min.js') }}" defer></script>
         <script src="{{ asset('js/lib/tempusdominus/js/moment-timezone.min.js') }}" defer></script>
         <script src="{{ asset('js/lib/tempusdominus/js/tempusdominus-bootstrap-4.min.js') }}" defer></script>
-        <script src="{{ asset('js/main.js') }}" defer></script>
-        
+
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body class="font-sans antialiased">

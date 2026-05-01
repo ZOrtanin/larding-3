@@ -60,6 +60,7 @@ Route::middleware(['auth', 'verified', 'role.assigned'])->group(function () {
     // Общие настройки сайта.
     Route::get('/settings', [SettingsController::class, 'edit'])->name('settings.edit');
     Route::patch('/settings', [SettingsController::class, 'update'])->name('settings.update');
+    Route::post('/settings/check-cms-update', [SettingsController::class, 'checkCmsUpdate'])->name('settings.check-cms-update');
     Route::post('/settings/update-cms', [SettingsController::class, 'updateCms'])->name('settings.update-cms');
     Route::post('/settings/test-mail', [SettingsController::class, 'sendTestMail'])->name('settings.test-mail');
 

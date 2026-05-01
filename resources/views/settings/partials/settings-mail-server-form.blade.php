@@ -31,6 +31,18 @@
                 <x-text-input id="mail_port" name="mail_port" type="text" class="mt-1 block w-full" :value="old('mail_port', $settings['mail_port'])" />
                 <x-input-error class="mt-2" :messages="$errors->get('mail_port')" />
             </div>
+
+            <div>
+                <x-input-label for="mail_from_address" :value="__('Отправитель Email')" />
+                <x-text-input id="mail_from_address" name="mail_from_address" type="email" class="mt-1 block w-full" :value="old('mail_from_address', $settings['mail_from_address'])" />
+                <x-input-error class="mt-2" :messages="$errors->get('mail_from_address')" />
+            </div>
+
+            <div>
+                <x-input-label for="orders_notification_email" :value="__('Email для заказов')" />
+                <x-text-input id="orders_notification_email" name="orders_notification_email" type="email" class="mt-1 block w-full" :value="old('orders_notification_email', $settings['orders_notification_email'])" />
+                <x-input-error class="mt-2" :messages="$errors->get('orders_notification_email')" />
+            </div>
         </div>
 
         <div class="basis-1/2 space-y-6 pr-3">
@@ -51,9 +63,15 @@
                 <x-text-input id="mail_encryption" name="mail_encryption" type="text" class="mt-1 block w-full" :value="old('mail_encryption', $settings['mail_encryption'])" />
                 <x-input-error class="mt-2" :messages="$errors->get('mail_encryption')" />
             </div>
+
+            <div>
+                <x-input-label for="mail_from_name" :value="__('Имя отправителя')" />
+                <x-text-input id="mail_from_name" name="mail_from_name" type="text" class="mt-1 block w-full" :value="old('mail_from_name', $settings['mail_from_name'])" />
+                <x-input-error class="mt-2" :messages="$errors->get('mail_from_name')" />
+            </div>
         </div>
 
-        <div class="mt-6 flex basis-full items-center justify-end gap-x-6">
+        <div class="mt-6 flex basis-full flex-wrap items-center justify-end gap-x-6 gap-y-4">
             @if (session('status') === 'settings-updated-mail')
                 <p
                     x-data="{ show: true }"
@@ -64,8 +82,28 @@
                 >{{ __('Сохраняю.') }}</p>
             @endif
 
+            @if (session('status') === 'mail-test-sent')
+                <p
+                    x-data="{ show: true }"
+                    x-show="show"
+                    x-transition
+                    x-init="setTimeout(() => show = false, 3000)"
+                    class="text-sm text-emerald-600 dark:text-emerald-400"
+                >{{ __('Тестовое письмо отправлено.') }}</p>
+            @endif
+
+            @if (session('cms_mail_error'))
+                <p class="text-sm text-red-600 dark:text-red-400">{{ session('cms_mail_error') }}</p>
+            @endif
+
+            <x-primary-button type="submit" form="mail-test-form">{{ __('Тестовое письмо') }}</x-primary-button>
+
             <x-primary-button>{{ __('Сохранить') }}</x-primary-button>
             
         </div>
+    </form>
+
+    <form id="mail-test-form" method="post" action="{{ route('settings.test-mail') }}" class="hidden">
+        @csrf
     </form>
 </section>

@@ -5,11 +5,17 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Lead;
 use App\Models\Notification;
+use App\Services\LeadMailService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class LeadController extends Controller
 {
+    public function __construct(
+        private readonly LeadMailService $leadMailService,
+    ) {
+    }
+
     // Создаёт лид из внешнего API-запроса.
     public function store(Request $request): JsonResponse
     {
@@ -41,6 +47,8 @@ class LeadController extends Controller
                 'source' => 'api',
             ],
         ]);
+
+        $this->leadMailService->sendNewLeadNotification($lead);
 
         return response()->json(
             [

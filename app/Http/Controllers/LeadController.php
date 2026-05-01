@@ -6,6 +6,7 @@ use App\Models\Block;
 use App\Models\Lead;
 use App\Models\Notification;
 use App\Models\Setting;
+use App\Services\LeadMailService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -13,6 +14,11 @@ use Illuminate\View\View;
 
 class LeadController extends Controller
 {
+    public function __construct(
+        private readonly LeadMailService $leadMailService,
+    ) {
+    }
+
     private const ALLOWED_VALIDATION_RULES = [
         'required',
         'nullable',
@@ -132,6 +138,8 @@ class LeadController extends Controller
                 'lead_id' => $lead->id,
             ],
         ]);
+
+        $this->leadMailService->sendNewLeadNotification($lead);
 
         if ($request->expectsJson()) {
             return response()->json([

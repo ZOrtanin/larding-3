@@ -114,25 +114,30 @@ class CmsUpdateService
 
         try {
             $this->report($progress, 'Скачивание архива обновления...');
-            $response = Http::timeout(120)->retry(2, 1000)->get($url)->throw();
-            $archiveContents = $response->body();
+            $response = Http::withHeaders([
+                'Accept' => 'application/zip,application/octet-stream;q=0.9,*/*;q=0.1',
+                'Accept-Encoding' => 'identity',
+            ])->withOptions([
+                'sink' => $archivePath,
+                'decode_content' => false,
+            ])->timeout(120)->retry(2, 1000)->get($url)->throw();
 
-            if ($archiveContents === '') {
+            if (! is_file($archivePath) || filesize($archivePath) === 0) {
                 throw new RuntimeException('Сервер обновлений вернул пустой архив.');
             }
 
-            if (! $this->looksLikeZipArchive($archiveContents)) {
-                $preview = substr($archiveContents, 0, 120);
+            $archivePreview = file_get_contents($archivePath, false, null, 0, 120);
 
+            if ($archivePreview === false) {
+                throw new RuntimeException('Не удалось прочитать загруженный архив обновления.');
+            }
+
+            if (! $this->looksLikeZipArchive($archivePreview)) {
                 throw new RuntimeException(sprintf(
                     'Сервер обновлений вернул не ZIP-архив. Content-Type: %s. Начало ответа: %s',
                     $response->header('Content-Type', 'unknown'),
-                    $this->sanitizePreview($preview),
+                    $this->sanitizePreview($archivePreview),
                 ));
-            }
-
-            if (file_put_contents($archivePath, $archiveContents) === false) {
-                throw new RuntimeException('Не удалось сохранить архив обновления во временную директорию.');
             }
 
             $this->report($progress, 'Распаковка архива...');
@@ -160,8 +165,14 @@ class CmsUpdateService
         $result = $zip->open($archivePath);
 
         if ($result !== true) {
+            if ($this->canUseSystemUnzip()) {
+                $this->extractArchiveWithSystemUnzip($archivePath, $extractPath, (int) $result);
+
+                return $this->detectPackageRoot($extractPath);
+            }
+
             throw new RuntimeException(sprintf(
-                'Не удалось открыть архив обновления. Код ZipArchive: %s, файл: %s, размер: %s байт.',
+                'Не удалось открыть архив обновления. Код ZipArchive: %s, файл: %s, размер: %s байт. Системный unzip недоступен.',
                 (string) $result,
                 $archivePath,
                 file_exists($archivePath) ? (string) filesize($archivePath) : 'missing',
@@ -172,6 +183,47 @@ class CmsUpdateService
         $zip->close();
 
         return $this->detectPackageRoot($extractPath);
+    }
+
+    private function canUseSystemUnzip(): bool
+    {
+        if (! function_exists('exec')) {
+            return false;
+        }
+
+        $disabledFunctions = array_map(
+            static fn (string $value): string => trim($value),
+            explode(',', (string) ini_get('disable_functions'))
+        );
+
+        if (in_array('exec', $disabledFunctions, true)) {
+            return false;
+        }
+
+        $unzipBinary = trim((string) shell_exec('command -v unzip 2>/dev/null'));
+
+        return $unzipBinary !== '';
+    }
+
+    private function extractArchiveWithSystemUnzip(string $archivePath, string $extractPath, int $zipErrorCode): void
+    {
+        $archiveArgument = escapeshellarg($archivePath);
+        $extractArgument = escapeshellarg($extractPath);
+        $output = [];
+        $exitCode = 0;
+
+        exec("unzip -oq $archiveArgument -d $extractArgument 2>&1", $output, $exitCode);
+
+        if ($exitCode !== 0) {
+            throw new RuntimeException(sprintf(
+                'Не удалось распаковать архив обновления. Код ZipArchive: %s, код unzip: %s, файл: %s, размер: %s байт. Вывод unzip: %s',
+                (string) $zipErrorCode,
+                (string) $exitCode,
+                $archivePath,
+                file_exists($archivePath) ? (string) filesize($archivePath) : 'missing',
+                $this->sanitizePreview(implode("\n", $output)),
+            ));
+        }
     }
 
     private function detectPackageRoot(string $extractPath): string

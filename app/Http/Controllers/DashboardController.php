@@ -44,7 +44,10 @@ class DashboardController extends Controller
         }
 
         return view('dashboard', [
-            'uniqueVisitors' => Visit::query()->distinct('visitor_id')->count('visitor_id'),
+            'uniqueVisitors' => Visit::query()
+                ->where('status_code', '<', 400)
+                ->distinct('visitor_id')
+                ->count('visitor_id'),
             'pageRefreshes' => Visit::query()->where('method', 'GET')->count(),
             'uniqueIps' => Visit::query()->whereNotNull('ip')->distinct('ip')->count('ip'),
             'leadsCount' => Lead::query()->count(),

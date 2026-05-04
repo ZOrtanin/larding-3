@@ -28,4 +28,30 @@ class PageBlockService
             ->sortBy('my_id')
             ->values();
     }
+
+    // Возвращает список блоков для селекта и навигации в админской панели.
+    public function getEditorBlocks(): Collection
+    {
+        return Block::query()
+            ->with('variables')
+            ->get()
+            ->map(function (Block $block) {
+                $variables = $block->variables;
+                $order = (int) optional($variables->firstWhere('name', 'order'))->default_value;
+                $isVisible = optional($variables->firstWhere('name', 'visibility'))->default_value ?? '1';
+
+                return [
+                    'id' => $block->id,
+                    'name' => $block->name ?: 'Без названия',
+                    'description' => $block->description ?: '',
+                    'order' => $order,
+                    'is_visible' => $isVisible === '1',
+                ];
+            })
+            ->sortBy([
+                ['order', 'asc'],
+                ['id', 'asc'],
+            ])
+            ->values();
+    }
 }

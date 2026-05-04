@@ -72,17 +72,34 @@
                 <div class="p-6 text-gray-900 dark:text-gray-100">
                     <div class="mb-6 flex items-center justify-between gap-4">
                         <h2 class="text-xl font-semibold">Последние визиты</h2>
-                        <form method="POST" action="{{ route('statistics.delete') }}">
-                            @csrf
-                            @method('DELETE')
-                            <button
-                                type="submit"
-                                onclick="return confirm('Сбросить всю статистику?');"
-                                class="inline-flex items-center rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-500"
-                            >
-                                Сбросить статистику
-                            </button>
-                        </form>
+                        <div class="flex flex-wrap items-center justify-end gap-4">
+                            <form method="GET" action="{{ route('statistics') }}" class="flex items-center gap-3">
+                                <label for="show_errors" class="flex cursor-pointer items-center gap-3 text-sm text-gray-300">
+                                    <input
+                                        id="show_errors"
+                                        name="show_errors"
+                                        type="checkbox"
+                                        value="1"
+                                        onchange="this.form.submit()"
+                                        @checked($showErrors)
+                                        class="h-4 w-4 rounded border-white/20 bg-white/5 text-orange-500 focus:ring-orange-500"
+                                    >
+                                    <span>Показывать запросы с ошибками</span>
+                                </label>
+                            </form>
+
+                            <form method="POST" action="{{ route('statistics.delete') }}">
+                                @csrf
+                                @method('DELETE')
+                                <button
+                                    type="submit"
+                                    onclick="return confirm('Сбросить всю статистику?');"
+                                    class="inline-flex items-center rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-500"
+                                >
+                                    Сбросить статистику
+                                </button>
+                            </form>
+                        </div>
                     </div>
                     <div class="mx-auto">
                         <div class="relative overflow-x-auto bg-neutral-primary-soft shadow-xs rounded-xl border border-gray-800">

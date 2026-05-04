@@ -34,6 +34,7 @@ class IndexController extends Controller
 
         $siteName = Setting::getValue('site_name', 'Супер сайт') ?? 'Супер сайт';
         $siteDescription = Setting::getValue('site_description', '') ?? '';
+        $editorBlocks = $this->pageBlockService->getEditorBlocks();
 
         return view('template.index', [
             'user' => $request->user(),
@@ -42,6 +43,7 @@ class IndexController extends Controller
             'site_description' => $siteDescription,
             'title' => 'WORKED',
             'block' => $renderedBlock,
+            'editorBlocks' => $editorBlocks,
         ]);
     }
 }

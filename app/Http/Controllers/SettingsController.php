@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Setting;
 use App\Services\CmsUpdateService;
+use App\Services\FaviconGenerator;
 use App\Services\MailSettingsService;
 use App\Mail\TestMailSettingsMail;
 use Illuminate\Http\RedirectResponse;
@@ -22,6 +23,7 @@ class SettingsController extends Controller
         'site_name',
         'site_description',
         'site_logo',
+        'site_favicon_source',
         'validation_rules',
         'mail_driver',
         'mail_host',
@@ -49,14 +51,24 @@ class SettingsController extends Controller
         ]);
     }
 
-    // Сохраняет общие настройки сайта и почты из формы админки.
-    public function update(Request $request): RedirectResponse {
-        $update_settings_name = '';
-
+    public function updateSiteInformation(Request $request): RedirectResponse
+    {
         $validated = $request->validate([
             'site_name' => ['nullable', 'string', 'max:255'],
             'site_description' => ['nullable', 'string', 'max:1000'],
             'site_logo' => ['nullable', 'string', 'max:2048'],
+        ]);
+
+        foreach (['site_name', 'site_description', 'site_logo'] as $key) {
+            Setting::setValue($key, $validated[$key] ?? null);
+        }
+
+        return Redirect::route('settings.edit')->with('status', 'settings-updated-site-information');
+    }
+
+    public function update(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
             'validation_rules' => ['nullable', 'string', 'max:10000'],
             'mail_driver' => ['nullable', 'string', 'max:255'],
             'mail_host' => ['nullable', 'string', 'max:255'],
@@ -69,21 +81,43 @@ class SettingsController extends Controller
             'orders_notification_email' => ['nullable', 'email', 'max:255'],
         ]);
 
+        if ($request->has('validation_rules')) {
+            Setting::setValue('validation_rules', $validated['validation_rules'] ?? null);
 
-
-        foreach (self::SETTINGS_KEYS as $key) {
-            
-            if($request[$key]!== null){
-                Setting::setValue($key, $validated[$key] ?? null);
-                $update_settings_name = explode('_', $key)[0];
-            }
-            
+            return Redirect::route('settings.edit')->with('status', 'settings-updated-validation');
         }
 
-        
-        return Redirect::route('settings.edit')->with('status', 'settings-updated-'.$update_settings_name);
-       
-        
+        $mailKeys = [
+            'mail_driver',
+            'mail_host',
+            'mail_port',
+            'mail_username',
+            'mail_password',
+            'mail_encryption',
+            'mail_from_address',
+            'mail_from_name',
+            'orders_notification_email',
+        ];
+
+        foreach ($mailKeys as $key) {
+            if ($request->has($key)) {
+                Setting::setValue($key, $validated[$key] ?? null);
+            }
+        }
+
+        return Redirect::route('settings.edit')->with('status', 'settings-updated-mail');
+    }
+
+    public function updateFavicon(Request $request, FaviconGenerator $faviconGenerator): RedirectResponse
+    {
+        $validated = $request->validate([
+            'site_favicon' => ['required', 'image', 'mimes:jpg,jpeg,png,gif,webp', 'max:4096'],
+        ]);
+
+        $favicon = $faviconGenerator->generateFromUpload($request->file('site_favicon'));
+        Setting::setValue('site_favicon_source', $favicon['source_path']);
+
+        return Redirect::route('settings.edit')->with('status', 'settings-updated-favicon');
     }
 
     public function sendTestMail(MailSettingsService $mailSettingsService): RedirectResponse
@@ -199,6 +233,7 @@ class SettingsController extends Controller
             'site_name' => 'Супер сайт',
             'site_description' => '',
             'site_logo' => '',
+            'site_favicon_source' => '',
             'validation_rules' => '',
             'mail_driver' => 'smtp',
             'mail_host' => 'smtp.larding.com',

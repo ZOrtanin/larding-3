@@ -13,7 +13,10 @@ class StatisticsController extends Controller
     public function show(): JsonResponse
     {
         $statistics = [
-            'unique_visitors' => Visit::query()->distinct('visitor_id')->count('visitor_id'),
+            'unique_visitors' => Visit::query()
+                ->where('status_code', '<', 400)
+                ->distinct('visitor_id')
+                ->count('visitor_id'),
             'page_refreshes' => Visit::query()->where('method', 'GET')->count(),
             'unique_ips' => Visit::query()->whereNotNull('ip')->distinct('ip')->count('ip'),
             'leads_count' => Lead::query()->count(),

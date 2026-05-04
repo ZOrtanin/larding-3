@@ -9,7 +9,7 @@
         </p>
     </header>
 
-    <form method="post" action="{{ route('settings.update') }}" class="mt-6 flex flex-row flex-wrap gap-0 space-x-0 space-y-6 leading-6">
+    <form method="post" action="{{ route('settings.update-site-information') }}" class="mt-6 flex flex-row flex-wrap gap-0 space-x-0 space-y-6 leading-6">
         @csrf
         @method('patch')
 
@@ -33,10 +33,11 @@
                 <x-text-input id="site_logo" name="site_logo" type="text" class="mt-1 block w-full" :value="old('site_logo', $settings['site_logo'])" />
                 <x-input-error class="mt-2" :messages="$errors->get('site_logo')" />
             </div>
+            
         </div>       
 
         <div class="mt-6 flex basis-full items-center justify-end gap-x-6">
-            @if (session('status') === 'settings-updated-site')
+            @if (session('status') === 'settings-updated-site-information')
                 <p
                     x-data="{ show: true }"
                     x-show="show"

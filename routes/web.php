@@ -35,6 +35,9 @@ Route::get('/', [IndexController::class, 'index'])->name('template.index');
 Route::post('/leads', [LeadController::class, 'store'])
     ->middleware('throttle:lead-form')
     ->name('leads.store');
+Route::get('/out', [LeadController::class, 'trackOutbound'])
+    ->middleware('throttle:lead-form')
+    ->name('leads.out');
 
 // Админ-панель доступна только авторизованным пользователям с назначенной ролью.
 Route::middleware(['auth', 'verified', 'role.assigned'])->group(function () {
@@ -60,6 +63,8 @@ Route::middleware(['auth', 'verified', 'role.assigned'])->group(function () {
     // Общие настройки сайта.
     Route::get('/settings', [SettingsController::class, 'edit'])->name('settings.edit');
     Route::patch('/settings', [SettingsController::class, 'update'])->name('settings.update');
+    Route::patch('/settings/site-information', [SettingsController::class, 'updateSiteInformation'])->name('settings.update-site-information');
+    Route::patch('/settings/favicon', [SettingsController::class, 'updateFavicon'])->name('settings.update-favicon');
     Route::post('/settings/check-cms-update', [SettingsController::class, 'checkCmsUpdate'])->name('settings.check-cms-update');
     Route::post('/settings/update-cms', [SettingsController::class, 'updateCms'])->name('settings.update-cms');
     Route::post('/settings/test-mail', [SettingsController::class, 'sendTestMail'])->name('settings.test-mail');

@@ -292,6 +292,8 @@ function initBlockEditor() {
     const deleteDrawerButton = document.getElementById('block-delete-button');
     const templateSelect = document.getElementById('block-template-select');
     const templateApplyButton = document.getElementById('block-template-apply');
+    const blockPickerSelect = document.getElementById('block-picker-select');
+    const blockPickerOpenButton = document.getElementById('block-picker-open');
     const methodInput = document.getElementById('block-form-method');
     const nameInput = document.getElementById('block-name');
     const descriptionInput = document.getElementById('block-description');
@@ -510,6 +512,22 @@ function initBlockEditor() {
         openDrawer();
     }
 
+    async function openBlockFromPicker(blockId) {
+        if (!blockId) {
+            return;
+        }
+
+        const blockNode = document.querySelector('.js-block-edit[data-block-id="' + String(blockId) + '"]');
+        if (blockNode) {
+            blockNode.scrollIntoView({
+                behavior: 'smooth',
+                block: 'center',
+            });
+        }
+
+        await setEditMode(blockId);
+    }
+
     async function runBlockAction(routeTemplate, blockId, method) {
         if (!blockId) {
             return;
@@ -578,6 +596,26 @@ function initBlockEditor() {
             }
 
             await applyTemplate(templateSelect.value);
+        });
+    }
+
+    if (blockPickerOpenButton) {
+        blockPickerOpenButton.addEventListener('click', async function () {
+            if (!blockPickerSelect) {
+                return;
+            }
+
+            await openBlockFromPicker(blockPickerSelect.value);
+        });
+    }
+
+    if (blockPickerSelect) {
+        blockPickerSelect.addEventListener('change', async function () {
+            if (!blockPickerSelect.value) {
+                return;
+            }
+
+            await openBlockFromPicker(blockPickerSelect.value);
         });
     }
 

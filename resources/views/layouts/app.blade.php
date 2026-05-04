@@ -7,6 +7,7 @@
         <meta name="description" content="{{ $siteDescription ?: config('app.name', 'Laravel') }}">
 
         <title>{{ $siteName ?: config('app.name', 'Laravel') }}</title>
+        @include('layouts.partials.favicon')
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
@@ -56,6 +57,7 @@
             <!-- <main> -->
                 {{ $slot }}
             <!-- </main> -->
+
         </div>
     </body>
 </html>

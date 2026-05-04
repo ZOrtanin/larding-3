@@ -7,6 +7,7 @@ use App\Models\Lead;
 use App\Models\Notification;
 use App\Models\Setting;
 use App\Services\LeadMailService;
+use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -122,24 +123,14 @@ class LeadController extends Controller
 
         $safeContent = $this->sanitizeLeadContent($validated['content'] ?? null);
 
-        $lead = Lead::query()->create([
-            'name' => $validated['name_form'],
-            'content' => $safeContent,
-            'status' => $validated['status'] ?? 'new',
-            'comments' => $validated['comments'] ?? null,
-        ]);
+        $lead = $this->createLeadRecord(
+            name: $validated['name_form'],
+            content: $safeContent,
+            status: $validated['status'] ?? 'new',
+            comments: $validated['comments'] ?? null,
+        );
 
-        Notification::query()->create([
-            'type' => 'lead',
-            'title' => 'Новая заявка',
-            'message' => $this->buildLeadNotificationMessage($lead),
-            'url' => route('lids'),
-            'payload' => [
-                'lead_id' => $lead->id,
-            ],
-        ]);
-
-        $this->leadMailService->sendNewLeadNotification($lead);
+        $this->notifyAboutLead($lead, 'Новая заявка');
 
         if ($request->expectsJson()) {
             return response()->json([
@@ -148,6 +139,64 @@ class LeadController extends Controller
             ], 201);
         }
         return '123';
+    }
+
+    public function trackOutbound(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'to' => ['required', 'url', 'max:2048'],
+            'label' => ['nullable', 'string', 'max:255'],
+            'source' => ['nullable', 'string', 'max:255'],
+        ]);
+
+        $targetUrl = $validated['to'];
+
+        if (! $this->isExternalUrl($targetUrl)) {
+            throw new HttpResponseException(
+                redirect()->route('template.index')->with('cms_lead_error', 'Разрешены только внешние ссылки.')
+            );
+        }
+
+        $label = trim((string) ($validated['label'] ?? ''));
+        $source = trim((string) ($validated['source'] ?? ''));
+
+        $contentLines = [
+            'Тип: переход по ссылке',
+            'Ссылка: '.$targetUrl,
+            'Страница: '.$request->headers->get('referer', $request->fullUrl()),
+        ];
+
+        if ($label !== '') {
+            $contentLines[] = 'Метка: '.$label;
+        }
+
+        if ($source !== '') {
+            $contentLines[] = 'Источник: '.$source;
+        }
+
+        $visitorId = trim((string) $request->cookie('visitor_id', ''));
+        if ($visitorId !== '') {
+            $contentLines[] = 'Visitor ID: '.$visitorId;
+        }
+
+        if ($request->ip()) {
+            $contentLines[] = 'IP: '.$request->ip();
+        }
+
+        if ($request->userAgent()) {
+            $contentLines[] = 'User-Agent: '.$request->userAgent();
+        }
+
+        $lead = $this->createLeadRecord(
+            name: $label !== '' ? 'Переход по ссылке: '.$label : 'Переход по внешней ссылке',
+            content: implode("\n", $contentLines),
+            status: 'new',
+            comments: null,
+        );
+
+        $this->notifyAboutLead($lead, 'Переход по ссылке');
+
+        return redirect()->away($targetUrl);
     }
 
     public function updateStatus(Request $request, Lead $lead): RedirectResponse {
@@ -245,6 +294,47 @@ class LeadController extends Controller
         }
 
         return $base.' — '.mb_substr($content, 0, 120);
+    }
+
+    private function createLeadRecord(string $name, ?string $content, string $status = 'new', ?string $comments = null): Lead
+    {
+        return Lead::query()->create([
+            'name' => $name,
+            'content' => $content,
+            'status' => $status,
+            'comments' => $comments,
+        ]);
+    }
+
+    private function notifyAboutLead(Lead $lead, string $title = 'Новая заявка'): void
+    {
+        Notification::query()->create([
+            'type' => 'lead',
+            'title' => $title,
+            'message' => $this->buildLeadNotificationMessage($lead),
+            'url' => route('lids'),
+            'payload' => [
+                'lead_id' => $lead->id,
+            ],
+        ]);
+
+        $this->leadMailService->sendNewLeadNotification($lead);
+    }
+
+    private function isExternalUrl(string $url): bool
+    {
+        $targetHost = parse_url($url, PHP_URL_HOST);
+        $appHost = parse_url((string) config('app.url'), PHP_URL_HOST);
+
+        if (! is_string($targetHost) || $targetHost === '') {
+            return false;
+        }
+
+        if (! is_string($appHost) || $appHost === '') {
+            return true;
+        }
+
+        return mb_strtolower($targetHost) !== mb_strtolower($appHost);
     }
 
     private function loadValidationRulesFromSettings(): array {

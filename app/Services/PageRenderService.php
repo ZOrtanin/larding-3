@@ -57,6 +57,14 @@ class PageRenderService
     {
         $html = str_replace('{{ $block_id }}', (string) $blockId, $html);
         $html = str_replace('{{ $site_url }}', config('app.url'), $html);
+        $html = str_replace(['{{ admin_hide_start }}', '{{admin_hide_start}}'], '<!-- ADMIN_HIDE_START -->', $html);
+        $html = str_replace(['{{ admin_hide_end }}', '{{admin_hide_end}}'], '<!-- ADMIN_HIDE_END -->', $html);
+
+        if ($isAdmin) {
+            $html = preg_replace('/<!--\s*ADMIN_HIDE_START\s*-->.*?<!--\s*ADMIN_HIDE_END\s*-->/si', '', $html) ?? $html;
+        }
+
+        $html = str_replace(['<!-- ADMIN_HIDE_START -->', '<!-- ADMIN_HIDE_END -->'], '', $html);
 
         // Принудительно устанавливаем display:block для блоков первого уровня при рендере с админскими правами
         if ($isAdmin) {

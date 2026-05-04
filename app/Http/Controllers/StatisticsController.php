@@ -11,14 +11,29 @@ class StatisticsController extends Controller
 {
     public function index(): View
     {
+        $showErrors = request()->boolean('show_errors');
+
         $stats = [
-            'unique_visitors' => Visit::query()->distinct('visitor_id')->count('visitor_id'),
+            'unique_visitors' => Visit::query()
+                ->where('status_code', '<', 400)
+                ->distinct('visitor_id')
+                ->count('visitor_id'),
             'page_refreshes' => Visit::query()->where('method', 'GET')->count(),
             'unique_ips' => Visit::query()->whereNotNull('ip')->distinct('ip')->count('ip'),
             'error_responses' => Visit::query()->where('status_code', '>=', 400)->count(),
         ];
 
-        $visits = Visit::query()
+        $visitsQuery = Visit::query();
+
+        if (! $showErrors) {
+            $visitsQuery->where(function ($query) {
+                $query
+                    ->whereNull('status_code')
+                    ->orWhere('status_code', '<', 400);
+            });
+        }
+
+        $visits = $visitsQuery
             ->latest()
             ->paginate(40, [
                 'id',
@@ -53,6 +68,7 @@ class StatisticsController extends Controller
             'stats' => $stats,
             'visits' => $visits,
             'paginationItems' => $paginationItems,
+            'showErrors' => $showErrors,
         ]);
     }
 

@@ -24,6 +24,21 @@ class PageRenderService
         return Blade::render($html, $data);
     }
 
+    public function renderRaw(Collection $blocks, array $data = []): string
+    {
+        $html = '';
+
+        foreach ($blocks as $block) {
+            if (! $block['is_visible']) {
+                continue;
+            }
+
+            $html .= $this->replaceBlockPlaceholders((string) $block['data'], (int) $block['block_id'], false);
+        }
+
+        return Blade::render($html, $data);
+    }
+
     // Рендерит один блок страницы и при необходимости добавляет админские элементы управления.
     private function renderBlock(array $block, bool $isAdmin): string
     {

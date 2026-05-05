@@ -1,4 +1,4 @@
-<x-app-layout :site-name="$site_name" :site-description="$site_description">
+<x-app-layout :site-name="$site_name" :site-description="$site_description" :head-html="$head_html" :front-css="$front_css" :body-start-html="$body_start_html" :body-end-html="$body_end_html" :front-js="$front_js">
     @php($hasAssignedRole = (bool) Auth::user()?->role_id)
     @auth
         @if ($hasAssignedRole)
@@ -16,7 +16,7 @@
                                         <option value="">Выберите блок</option>
                                         @foreach (($editorBlocks ?? collect()) as $blockOption)
                                             <option value="{{ $blockOption['id'] }}">
-                                                #{{ $blockOption['order'] ?: $blockOption['id'] }} - {{ $blockOption['name'] }}{{ $blockOption['is_visible'] ? '' : ' (скрыт)' }}
+                                                [{{ $blockOption['placement'] }}] #{{ $blockOption['order'] ?: $blockOption['id'] }} - {{ $blockOption['name'] }}{{ $blockOption['is_system'] ? ' (системный)' : '' }}{{ $blockOption['is_visible'] ? '' : ' (скрыт)' }}
                                             </option>
                                         @endforeach
                                     </select>

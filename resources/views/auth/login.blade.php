@@ -127,12 +127,6 @@
 
         </form>
 
-        <p class="mt-10 text-center text-sm/6 text-gray-400">
-          Нет аккаунта? 
-          <a href="#" class="font-semibold text-indigo-400 hover:text-indigo-300">зарегистрируйся</a>
-          |
-          <a href="#" class="font-semibold text-indigo-400 hover:text-indigo-300">Забыл пароль?</a>
-        </p>
       </div>
     </div>
 </div>

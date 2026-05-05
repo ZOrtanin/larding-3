@@ -23,6 +23,7 @@ class BlockController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
             'content' => ['required', 'string'],
+            'placement' => ['nullable', 'in:'.implode(',', Block::PLACEMENTS)],
             'variables' => ['nullable', 'array'],
             'variables.*.name' => ['nullable', 'string', 'max:255'],
             'variables.*.label' => ['nullable', 'string', 'max:255'],
@@ -34,7 +35,10 @@ class BlockController extends Controller
         $name = $validated['name'];
         $content = $validated['content'];
         $description = $validated['description'] ?? null;
-        $lastBlock = Block::with('variables')->get()
+        $placement = $validated['placement'] ?? Block::PLACEMENT_CONTENT;
+        $lastBlock = Block::with('variables')
+            ->where('placement', $placement)
+            ->get()
             ->flatMap(function ($block) {
                 return $block->variables
                     ->where('name', 'order')
@@ -47,6 +51,7 @@ class BlockController extends Controller
             'name' => $name,
             'description' => $description,
             'blade_template' => $content,
+            'placement' => $placement,
         ]);
 
         $block->variables()->createMany([
@@ -82,6 +87,8 @@ class BlockController extends Controller
             'name' => $block->name,
             'description' => $block->description,
             'content' => $block->blade_template,
+            'placement' => $block->placement,
+            'is_system' => $block->is_system,
             'variables' => $block->variables()
                 ->whereNotIn('name', self::SYSTEM_VARIABLE_NAMES)
                 ->orderBy('id')
@@ -116,6 +123,7 @@ class BlockController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
             'content' => ['required', 'string'],
+            'placement' => ['nullable', 'in:'.implode(',', Block::PLACEMENTS)],
             'variables' => ['nullable', 'array'],
             'variables.*.name' => ['nullable', 'string', 'max:255'],
             'variables.*.label' => ['nullable', 'string', 'max:255'],
@@ -128,6 +136,7 @@ class BlockController extends Controller
             'name' => $validated['name'],
             'description' => $validated['description'] ?? null,
             'blade_template' => $validated['content'],
+            'placement' => $validated['placement'] ?? $block->placement,
         ]);
 
         $block->variables()
@@ -145,6 +154,13 @@ class BlockController extends Controller
 
     // Удаляет блок страницы.
     public function delete(Block $block): JsonResponse {
+        if ($block->is_system) {
+            return response()->json([
+                'ok' => false,
+                'message' => 'Системный layout-блок нельзя удалить.',
+            ], 422);
+        }
+
         $block->delete();
 
         return response()->json([
@@ -203,6 +219,9 @@ class BlockController extends Controller
         $regexOperator = $driver === 'pgsql' ? '~' : 'REGEXP';
 
         $neighborQuery = BlockVariable::query()
+            ->whereHas('block', function ($query) use ($block) {
+                $query->where('placement', $block->placement);
+            })
             ->where('name', 'order')
             ->where('block_id', '!=', $block->id)
             ->whereRaw("default_value {$regexOperator} '^(-?[0-9]+)$'");

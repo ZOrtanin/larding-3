@@ -67,6 +67,7 @@ Route::middleware(['auth', 'verified', 'role.assigned'])->group(function () {
     Route::patch('/settings/favicon', [SettingsController::class, 'updateFavicon'])->name('settings.update-favicon');
     Route::post('/settings/check-cms-update', [SettingsController::class, 'checkCmsUpdate'])->name('settings.check-cms-update');
     Route::post('/settings/update-cms', [SettingsController::class, 'updateCms'])->name('settings.update-cms');
+    Route::get('/settings/update-cms-progress', [SettingsController::class, 'cmsUpdateProgress'])->name('settings.update-cms-progress');
     Route::post('/settings/test-mail', [SettingsController::class, 'sendTestMail'])->name('settings.test-mail');
 
     // Создание и редактирование блоков сайта.

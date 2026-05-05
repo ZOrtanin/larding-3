@@ -10,6 +10,7 @@ use App\Mail\TestMailSettingsMail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
@@ -17,6 +18,7 @@ use Illuminate\View\View;
 class SettingsController extends Controller
 {
     private const UPDATE_STATE_SESSION_KEY = 'cms_update_state';
+    private const UPDATE_PROGRESS_CACHE_PREFIX = 'cms_update_progress_user_';
 
     // Ключи настроек сайта, которые сохраняются в таблицу settings.
     private const SETTINGS_KEYS = [
@@ -139,12 +141,43 @@ class SettingsController extends Controller
         }
     }
 
-    public function updateCms(CmsUpdateService $cmsUpdateService): RedirectResponse
+    public function updateCms(Request $request, CmsUpdateService $cmsUpdateService): RedirectResponse|JsonResponse
     {
+        $progressKey = $this->cmsUpdateProgressKey($request);
+
         try {
+            $this->storeUpdateProgress($progressKey, [
+                'status' => 'running',
+                'step' => 'init',
+                'message' => 'Подготавливаем обновление...',
+                'percent' => 5,
+                'updated_at' => now()->toDateTimeString(),
+            ]);
+
             $latestRelease = $cmsUpdateService->latestRelease();
 
             if ($latestRelease === null || ! $cmsUpdateService->remoteUpdateAvailable()) {
+                $this->storeUpdateProgress($progressKey, [
+                    'status' => 'completed',
+                    'step' => 'done',
+                    'message' => 'Новых обновлений не найдено.',
+                    'percent' => 100,
+                    'updated_at' => now()->toDateTimeString(),
+                ]);
+
+                if ($request->expectsJson()) {
+                    return response()->json([
+                        'message' => 'Новых обновлений не найдено.',
+                        'state' => [
+                            'latest_version' => $latestRelease['version'] ?? null,
+                            'archive_url' => $latestRelease['url'] ?? null,
+                            'update_available' => false,
+                            'manifest_error' => null,
+                            'checked_at' => now()->toDateTimeString(),
+                        ],
+                    ]);
+                }
+
                 return Redirect::route('settings.edit')
                     ->with('status', 'cms-update-not-available')
                     ->with(self::UPDATE_STATE_SESSION_KEY, [
@@ -157,13 +190,57 @@ class SettingsController extends Controller
             }
 
             $cmsUpdateService->updateFromArchiveUrl(
-                progress: null,
+                progress: function (string $message) use ($progressKey): void {
+                    $this->storeUpdateProgress($progressKey, $this->progressPayloadFromMessage($message));
+                },
                 archiveUrl: $latestRelease['url'],
                 targetVersion: $latestRelease['version'],
             );
 
+            $this->storeUpdateProgress($progressKey, [
+                'status' => 'completed',
+                'step' => 'done',
+                'message' => 'Обновление завершено.',
+                'percent' => 100,
+                'updated_at' => now()->toDateTimeString(),
+            ]);
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message' => 'CMS успешно обновлена.',
+                    'state' => [
+                        'latest_version' => $latestRelease['version'],
+                        'archive_url' => $latestRelease['url'],
+                        'update_available' => false,
+                        'manifest_error' => null,
+                        'checked_at' => now()->toDateTimeString(),
+                    ],
+                ]);
+            }
+
             return Redirect::route('settings.edit')->with('status', 'cms-updated');
         } catch (\Throwable $exception) {
+            $this->storeUpdateProgress($progressKey, [
+                'status' => 'error',
+                'step' => 'error',
+                'message' => $exception->getMessage(),
+                'percent' => 100,
+                'updated_at' => now()->toDateTimeString(),
+            ]);
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message' => $exception->getMessage(),
+                    'state' => [
+                        'latest_version' => null,
+                        'archive_url' => null,
+                        'update_available' => false,
+                        'manifest_error' => $exception->getMessage(),
+                        'checked_at' => now()->toDateTimeString(),
+                    ],
+                ], 422);
+            }
+
             return Redirect::route('settings.edit')
                 ->with(self::UPDATE_STATE_SESSION_KEY, [
                     'latest_version' => null,
@@ -174,6 +251,22 @@ class SettingsController extends Controller
                 ])
                 ->with('cms_update_error', $exception->getMessage());
         }
+    }
+
+    public function cmsUpdateProgress(Request $request): JsonResponse
+    {
+        $progress = Cache::get($this->cmsUpdateProgressKey($request), [
+            'status' => 'idle',
+            'step' => null,
+            'message' => null,
+            'percent' => 0,
+            'updated_at' => null,
+        ]);
+
+        return response()->json([
+            'status' => 'ok',
+            'data' => $progress,
+        ]);
     }
 
     public function checkCmsUpdate(Request $request, CmsUpdateService $cmsUpdateService): RedirectResponse|JsonResponse
@@ -264,5 +357,78 @@ class SettingsController extends Controller
             'manifest_error' => null,
             'checked_at' => null,
         ], $storedState);
+    }
+
+    private function cmsUpdateProgressKey(Request $request): string
+    {
+        return self::UPDATE_PROGRESS_CACHE_PREFIX.($request->user()?->id ?? 'guest');
+    }
+
+    /**
+     * @param array<string, mixed> $payload
+     */
+    private function storeUpdateProgress(string $key, array $payload): void
+    {
+        Cache::put($key, $payload, now()->addMinutes(30));
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function progressPayloadFromMessage(string $message): array
+    {
+        $normalized = mb_strtolower($message);
+
+        return match (true) {
+            str_contains($normalized, 'скачивание') => [
+                'status' => 'running',
+                'step' => 'download',
+                'message' => $message,
+                'percent' => 20,
+                'updated_at' => now()->toDateTimeString(),
+            ],
+            str_contains($normalized, 'распаковка') => [
+                'status' => 'running',
+                'step' => 'extract',
+                'message' => $message,
+                'percent' => 45,
+                'updated_at' => now()->toDateTimeString(),
+            ],
+            str_contains($normalized, 'обновление файлов') => [
+                'status' => 'running',
+                'step' => 'files',
+                'message' => $message,
+                'percent' => 65,
+                'updated_at' => now()->toDateTimeString(),
+            ],
+            str_contains($normalized, 'миграц') => [
+                'status' => 'running',
+                'step' => 'migrations',
+                'message' => $message,
+                'percent' => 82,
+                'updated_at' => now()->toDateTimeString(),
+            ],
+            str_contains($normalized, 'кэш') => [
+                'status' => 'running',
+                'step' => 'cache',
+                'message' => $message,
+                'percent' => 94,
+                'updated_at' => now()->toDateTimeString(),
+            ],
+            str_contains($normalized, 'завершено') => [
+                'status' => 'completed',
+                'step' => 'done',
+                'message' => $message,
+                'percent' => 100,
+                'updated_at' => now()->toDateTimeString(),
+            ],
+            default => [
+                'status' => 'running',
+                'step' => 'processing',
+                'message' => $message,
+                'percent' => 10,
+                'updated_at' => now()->toDateTimeString(),
+            ],
+        };
     }
 }

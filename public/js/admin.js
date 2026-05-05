@@ -297,13 +297,14 @@ function initBlockEditor() {
     const methodInput = document.getElementById('block-form-method');
     const nameInput = document.getElementById('block-name');
     const descriptionInput = document.getElementById('block-description');
+    const placementInput = document.getElementById('block-placement');
     const contentInput = document.getElementById('block-content');
     const variablesList = document.getElementById('block-variables-list');
     const variableTemplate = document.getElementById('block-variable-template');
     const addVariableButton = document.getElementById('block-variable-add');
     const addBlockButtons = document.querySelectorAll('.js-add-block-button');
 
-    if (!blockForm || !drawer || !drawerTitle || !submitButton || !methodInput || !nameInput || !descriptionInput || !contentInput) {
+    if (!blockForm || !drawer || !drawerTitle || !submitButton || !methodInput || !nameInput || !descriptionInput || !placementInput || !contentInput) {
         return;
     }
 
@@ -450,6 +451,7 @@ function initBlockEditor() {
     function fillBlockForm(block) {
         nameInput.value = block.name ?? '';
         descriptionInput.value = block.description ?? '';
+        placementInput.value = block.placement ?? 'content';
         contentInput.value = block.content ?? '';
         contentInput.dispatchEvent(new CustomEvent('block-editor:update', {
             detail: { value: contentInput.value },
@@ -467,8 +469,10 @@ function initBlockEditor() {
         fillBlockForm(options.block ?? {});
 
         if (deleteDrawerButton) {
-            deleteDrawerButton.classList.toggle('hidden', !options.blockId);
+            deleteDrawerButton.classList.toggle('hidden', !options.blockId || Boolean(options.block?.is_system));
         }
+
+        placementInput.disabled = Boolean(options.block?.is_system);
     }
 
     function setCreateMode() {
@@ -479,6 +483,7 @@ function initBlockEditor() {
             block: {
                 name: '',
                 description: '',
+                placement: 'content',
                 content: '',
                 variables: [],
             },
@@ -535,6 +540,13 @@ function initBlockEditor() {
 
         const response = await request(buildUrl(routeTemplate, '__BLOCK__', blockId), { method });
         if (!response.ok) {
+            if (response.status === 422) {
+                const payload = await response.json().catch(() => null);
+                if (payload?.message) {
+                    window.alert(payload.message);
+                }
+            }
+
             return;
         }
 

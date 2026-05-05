@@ -3,12 +3,14 @@
 namespace App\Services;
 
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use RuntimeException;
 
 class FaviconGenerator
 {
     private const OUTPUT_DIRECTORY = 'system/favicon';
+    private const PUBLIC_OUTPUT_DIRECTORY = 'system/favicon';
 
     /**
      * @return array<string, string>
@@ -48,24 +50,24 @@ class FaviconGenerator
         }
 
         foreach ($pngBinaries as $filename => $binary) {
-            Storage::disk('public')->put(self::OUTPUT_DIRECTORY.'/'.$filename, $binary);
+            $this->putPublicAsset($filename, $binary);
         }
 
-        Storage::disk('public')->put(
-            self::OUTPUT_DIRECTORY.'/favicon.ico',
+        $this->putPublicAsset(
+            'favicon.ico',
             $this->buildIco([
                 16 => $pngBinaries['favicon-16x16.png'],
                 32 => $pngBinaries['favicon-32x32.png'],
             ]),
         );
 
-        Storage::disk('public')->put(
-            self::OUTPUT_DIRECTORY.'/site.webmanifest',
+        $this->putPublicAsset(
+            'site.webmanifest',
             $this->buildManifest(),
         );
 
-        Storage::disk('public')->put(
-            self::OUTPUT_DIRECTORY.'/browserconfig.xml',
+        $this->putPublicAsset(
+            'browserconfig.xml',
             $this->buildBrowserConfig(),
         );
 
@@ -178,12 +180,12 @@ class FaviconGenerator
             'short_name' => 'Larding',
             'icons' => [
                 [
-                    'src' => '/storage/system/favicon/favicon-192.png',
+                    'src' => '/system/favicon/favicon-192.png',
                     'sizes' => '192x192',
                     'type' => 'image/png',
                 ],
                 [
-                    'src' => '/storage/system/favicon/favicon-512.png',
+                    'src' => '/system/favicon/favicon-512.png',
                     'sizes' => '512x512',
                     'type' => 'image/png',
                 ],
@@ -201,11 +203,22 @@ class FaviconGenerator
 <browserconfig>
   <msapplication>
     <tile>
-      <square150x150logo src="/storage/system/favicon/favicon-192.png"/>
+      <square150x150logo src="/system/favicon/favicon-192.png"/>
       <TileColor>#1a120d</TileColor>
     </tile>
   </msapplication>
 </browserconfig>
 XML;
+    }
+
+    private function putPublicAsset(string $filename, string $contents): void
+    {
+        $directory = public_path(self::PUBLIC_OUTPUT_DIRECTORY);
+
+        if (! File::exists($directory)) {
+            File::ensureDirectoryExists($directory);
+        }
+
+        File::put($directory.'/'.$filename, $contents);
     }
 }

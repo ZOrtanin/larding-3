@@ -2,7 +2,7 @@
 
 namespace App\Support;
 
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\File;
 
 class FaviconAssets
 {
@@ -11,15 +11,15 @@ class FaviconAssets
      */
     public static function urls(): array
     {
-        if (Storage::disk('public')->exists('system/favicon/favicon.ico')) {
+        if (File::exists(public_path('system/favicon/favicon.ico'))) {
             return [
-                'ico' => asset('storage/system/favicon/favicon.ico'),
-                'svg' => asset('storage/system/favicon/favicon-512.png'),
-                'png32' => asset('storage/system/favicon/favicon-32x32.png'),
-                'png16' => asset('storage/system/favicon/favicon-16x16.png'),
-                'apple' => asset('storage/system/favicon/apple-touch-icon.png'),
-                'manifest' => asset('storage/system/favicon/site.webmanifest'),
-                'browserconfig' => asset('storage/system/favicon/browserconfig.xml'),
+                'ico' => asset('system/favicon/favicon.ico'),
+                'svg' => asset('system/favicon/favicon-512.png'),
+                'png32' => asset('system/favicon/favicon-32x32.png'),
+                'png16' => asset('system/favicon/favicon-16x16.png'),
+                'apple' => asset('system/favicon/apple-touch-icon.png'),
+                'manifest' => asset('system/favicon/site.webmanifest'),
+                'browserconfig' => asset('system/favicon/browserconfig.xml'),
             ];
         }
 

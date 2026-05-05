@@ -14,6 +14,11 @@ class AppLayout extends Component
     public function __construct(
         public ?string $siteName = null,
         public ?string $siteDescription = null,
+        public ?string $headHtml = null,
+        public ?string $frontCss = null,
+        public ?string $bodyStartHtml = null,
+        public ?string $bodyEndHtml = null,
+        public ?string $frontJs = null,
         public ?Collection $notifications = null,
         public ?Collection $editorBlocks = null,
         public int $unreadNotificationsCount = 0,
@@ -41,10 +46,13 @@ class AppLayout extends Component
                         'name' => $block->name ?: 'Без названия',
                         'description' => $block->description ?: '',
                         'order' => $order,
+                        'placement' => $block->placement,
+                        'is_system' => $block->is_system,
                         'is_visible' => $isVisible,
                     ];
                 })
                 ->sortBy([
+                    ['placement', 'asc'],
                     ['order', 'asc'],
                     ['id', 'asc'],
                 ])

@@ -10,8 +10,14 @@ class PageBlockService
     // Загружает блоки страницы, обогащает служебными данными и сортирует по порядку.
     public function getSortedBlocks(): Collection
     {
+        return $this->getSortedBlocksByPlacement(Block::PLACEMENT_CONTENT);
+    }
+
+    public function getSortedBlocksByPlacement(string $placement): Collection
+    {
         return Block::query()
             ->with('variables')
+            ->where('placement', $placement)
             ->get()
             ->map(function (Block $block) {
                 $variables = $block->variables;
@@ -21,6 +27,8 @@ class PageBlockService
                 return [
                     'my_id' => $order,
                     'block_id' => $block->id,
+                    'placement' => $block->placement,
+                    'is_system' => $block->is_system,
                     'is_visible' => $isVisible === '1',
                     'data' => $block->blade_template,
                 ];
@@ -45,10 +53,13 @@ class PageBlockService
                     'name' => $block->name ?: 'Без названия',
                     'description' => $block->description ?: '',
                     'order' => $order,
+                    'placement' => $block->placement,
+                    'is_system' => $block->is_system,
                     'is_visible' => $isVisible === '1',
                 ];
             })
             ->sortBy([
+                ['placement', 'asc'],
                 ['order', 'asc'],
                 ['id', 'asc'],
             ])

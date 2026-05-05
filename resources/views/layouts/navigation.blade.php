@@ -104,6 +104,21 @@
                               </div>
                             </div>
 
+                            <div class="sm:col-span-3 mb-3">
+                              <label for="block-placement" class="block text-sm/6 font-medium text-white">Место вывода</label>
+                              <div class="mt-2">
+                                <select id="block-placement" name="placement" class="block w-full rounded-md bg-gray-800 px-3 py-1.5 text-base text-white outline-1 -outline-offset-1 outline-white/10 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6">
+                                  <option value="content">content</option>
+                                  <option value="head">head</option>
+                                  <option value="body_start">body_start</option>
+                                  <option value="body_end">body_end</option>
+                                  <option value="front_css">front_css</option>
+                                  <option value="front_js">front_js</option>
+                                </select>
+                              </div>
+                              <p class="mt-2 text-xs text-gray-400">Системные layout-блоки редактируются здесь же, но удалить их нельзя.</p>
+                            </div>
+
                             <div class="col-span-full mb-3">
                               <div class="flex items-center justify-between gap-4">
                                 <label for="block-content" class="block text-sm/6 font-medium text-white">Контент</label>

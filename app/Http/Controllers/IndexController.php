@@ -26,11 +26,21 @@ class IndexController extends Controller
         ];
 
         $sortedBlocks = $this->pageBlockService->getSortedBlocks();
+        $headBlocks = $this->pageBlockService->getSortedBlocksByPlacement('head');
+        $bodyStartBlocks = $this->pageBlockService->getSortedBlocksByPlacement('body_start');
+        $bodyEndBlocks = $this->pageBlockService->getSortedBlocksByPlacement('body_end');
+        $frontCssBlocks = $this->pageBlockService->getSortedBlocksByPlacement('front_css');
+        $frontJsBlocks = $this->pageBlockService->getSortedBlocksByPlacement('front_js');
         $renderedBlock = $this->pageRenderService->render(
             $sortedBlocks,
             (bool) $request->user(),
             $data
         );
+        $renderedHeadBlocks = $this->pageRenderService->renderRaw($headBlocks, $data);
+        $renderedBodyStartBlocks = $this->pageRenderService->renderRaw($bodyStartBlocks, $data);
+        $renderedBodyEndBlocks = $this->pageRenderService->renderRaw($bodyEndBlocks, $data);
+        $renderedFrontCssBlocks = $this->pageRenderService->renderRaw($frontCssBlocks, $data);
+        $renderedFrontJsBlocks = $this->pageRenderService->renderRaw($frontJsBlocks, $data);
 
         $siteName = Setting::getValue('site_name', 'Супер сайт') ?? 'Супер сайт';
         $siteDescription = Setting::getValue('site_description', '') ?? '';
@@ -43,6 +53,11 @@ class IndexController extends Controller
             'site_description' => $siteDescription,
             'title' => 'WORKED',
             'block' => $renderedBlock,
+            'head_html' => $renderedHeadBlocks,
+            'front_css' => $renderedFrontCssBlocks,
+            'body_start_html' => $renderedBodyStartBlocks,
+            'body_end_html' => $renderedBodyEndBlocks,
+            'front_js' => $renderedFrontJsBlocks,
             'editorBlocks' => $editorBlocks,
         ]);
     }

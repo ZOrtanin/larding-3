@@ -1,3 +1,5 @@
+@php($favicon = \App\Support\FaviconAssets::urls())
+
 <section>
     <header>
         <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
@@ -33,7 +35,7 @@
         <div class="basis-1/2 space-y-6 pr-3">
             @if ($settings['site_favicon_source'])                
                 <img
-                    src="{{ asset('storage/'.$settings['site_favicon_source']) }}"
+                    src="{{ $favicon['png32'] }}"
                     alt="Текущая favicon"
                     class="h-16 w-16 rounded-lg border border-gray-200 bg-white object-cover dark:border-gray-700 dark:bg-gray-800"
                 >                

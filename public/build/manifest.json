@@ -1,6 +1,6 @@
 {
   "resources/css/admin.css": {
-    "file": "assets/site-gyXclV3s.css",
+    "file": "assets/site-CLzUJycg.css",
     "src": "resources/css/site.css",
     "isEntry": true,
     "name": "admin",
@@ -10,7 +10,7 @@
     ]
   },
   "resources/css/site.css": {
-    "file": "assets/site-gyXclV3s.css",
+    "file": "assets/site-CLzUJycg.css",
     "src": "resources/css/site.css",
     "isEntry": true,
     "name": "admin",
@@ -20,7 +20,7 @@
     ]
   },
   "resources/js/admin.js": {
-    "file": "assets/admin-DNl-p0gQ.js",
+    "file": "assets/admin-B8qRCRne.js",
     "name": "admin",
     "src": "resources/js/admin.js",
     "isEntry": true,
@@ -29,7 +29,7 @@
     ]
   },
   "resources/js/site.js": {
-    "file": "assets/site-D40b2O94.js",
+    "file": "assets/site-BrNzGkcc.js",
     "name": "site",
     "src": "resources/js/site.js",
     "isEntry": true

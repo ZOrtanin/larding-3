@@ -123,48 +123,107 @@ class BlockTemplateSeeder extends Seeder
                 'name' => 'Форма обратной связи',
                 'slug' => 'contact-cta',
                 'description' => 'Финальный призыв с формой связи',
-                'blade_template' => '<div class="flex w-full bg-dark dark:bg-gray-800 mx-auto px-6 py-12 " >
-                                        <div class="container mx-auto px-6 py-12">
-                                            <div class="p-8 rounded">
-                                             
+                'blade_template' => '<!-- Форма обратной связи -->
+                  <div class="mx-auto flex w-full bg-white px-4 py-10 sm:px-6 sm:py-12" data-lead-form-block>
+                      <div class="container mx-auto max-w-5xl px-0">
+                          <div class="rounded-2xl p-0 sm:p-4">
+                              <form class="lead-form grid gap-8 md:grid-cols-2 md:gap-10" method="POST" action="/leads">
+                                  <input type="hidden" name="name_form" value="Форма обратной связи" />
+                                  <input type="hidden" name="block_id" value="{{ $block_id }}" />
 
-                                              <form class="lead-form grid grid-cols-6 gap-4"  method="POST" action="/leads">
-                                                <input type="hidden" name="name_form" value="Форма обратной связи" />
-                                                <input type="hidden" name="block_id" value="{{ $block_id }}" />
+                                  <div class="py-2 md:py-4">
+                                      <h2 class="font-medium text-3xl text-orange-600 sm:text-4xl">Связаться</h2>
+                                      <p class="mt-4 text-base leading-7 text-gray-400 sm:mt-6 sm:text-lg">
+                                          Ваши идеи и замечания делают нашу CMS лучше! Поделитесь мыслями — мы внимательно изучаем каждый отзыв.
+                                      </p>
+                                      <p class="lead-form-message mt-4 hidden text-sm text-gray-400"></p>
+                                  </div>
 
-                                                <div class="col-span-2 col-start-2 py-4">
-                                                    <h1 class="font-medium text-3xl text-orange-600 ">Связаться</h1>
-                                                    <p class="text-gray-400 mt-6 ">Ваши идеи и замечания делают нашу CMS лучше! Поделитесь мыслями — мы внимательно изучаем каждый отзыв.</p>
-                                                </div>
-                                                <div class="col-span-2  grid grid-cols-2 gap-4 ">
-                                                        <div class="">
-                                                            <label for="name" class="text-sm text-gray-400 block mb-1 font-medium">Имя</label>
-                                                            <input type="text" name="name" id="name" class="bg-gray-100 border border-gray-200 rounded py-1 px-3 block focus:ring-orange-500 focus:border-orange-500 text-gray-700 w-full" placeholder="Как к вам обращатся?" />
-                                                        </div>
-                                                        <div>
-                                                            <label for="email" class="text-sm text-gray-400 block mb-1 font-medium">Телефон</label>
-                                                            <input type="text" name="phone" id="email" class="bg-gray-100 border border-gray-200 rounded py-1 px-3 block focus:ring-orange-500 focus:border-orange-600 text-gray-700 w-full" placeholder="+7" />
-                                                        </div>
-                                                        <div class="col-span-2 ">
-                                                            <label for="job" class="text-sm text-gray-400 block mb-1 font-medium">Текст</label>
-                                                            <textarea type="text" name="job" id="job" row="12" class="bg-gray-100 border border-gray-200 rounded py-1 px-3 block focus:ring-orange-500 focus:border-orange-600 text-gray-700 w-full min-h-[50px]" placeholder="Ваше сообщение"/></textarea>
-                                                        </div>
-                                                        <div class="col-span-2 flex justify-end gap-4 py-3"> 
-                                                        <p class="lead-form-message"></p>
-                                                          <button type="submit" class="py-2 px-9 bg-orange-500 text-white rounded hover:bg-orange-600 active:bg-orange-700 disabled:opacity-50">Отправить</button>
-                                                        
-                                                          <!-- Secondary -->
-                                                          <!-- <button class="py-2 px-4 bg-white border border-gray-200 text-gray-600 rounded hover:bg-gray-100 active:bg-gray-200 disabled:opacity-50">Cancel</button> -->
-                                                      
-                                                        </div>
+                                  <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                      <div>
+                                          <label for="lead-name" class="mb-1 block text-sm font-medium text-gray-400">Имя</label>
+                                          <input
+                                              type="text"
+                                              name="name"
+                                              id="lead-name"
+                                              class="block w-full rounded border border-gray-200 bg-gray-100 px-4 py-3 text-gray-700 focus:border-orange-500 focus:ring-orange-500"
+                                              placeholder="Как к вам обращатся?"
+                                          />
+                                      </div>
 
-                                                </div>
+                                      <div>
+                                          <label for="lead-phone" class="mb-1 block text-sm font-medium text-gray-400">Телефон</label>
+                                          <input
+                                              type="text"
+                                              name="phone"
+                                              id="lead-phone"
+                                              class="block w-full rounded border border-gray-200 bg-gray-100 px-4 py-3 text-gray-700 focus:border-orange-500 focus:ring-orange-500"
+                                              placeholder="+7"
+                                          />
+                                      </div>
 
-                                                
-                                              </form>
-                                            </div>
-                                        </div>
-                                    </div>',
+                                      <div class="sm:col-span-2">
+                                          <label for="lead-job" class="mb-1 block text-sm font-medium text-gray-400">Текст</label>
+                                          <textarea
+                                              name="job"
+                                              id="lead-job"
+                                              rows="3"
+                                              class="block min-h-[30px] w-full rounded border border-gray-200 bg-gray-100 px-4 py-3 text-gray-700 focus:border-orange-500 focus:ring-orange-500"
+                                              placeholder="Ваше сообщение"
+                                          ></textarea>
+                                      </div>
+
+                                      <div class="sm:col-span-2 flex flex-col gap-4 pt-2">
+                                          <div class="flex justify-start sm:justify-end">
+                                              <button
+                                                  type="submit"
+                                                  class="lead-form-submit w-full rounded bg-orange-500 px-6 py-3 text-white hover:bg-orange-600 active:bg-orange-700 disabled:opacity-50 sm:w-auto sm:px-9"
+                                              >
+                                                  Отправить
+                                              </button>
+                                          </div>
+                                      </div>
+                                  </div>
+                              </form>
+                          </div>
+
+                          <div
+                              class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/60 px-4 backdrop-blur-md"
+                              data-form-status-modal
+                              data-state="info"
+                          >
+                              <article
+                                  class="flex w-full max-w-[330px] flex-col items-center rounded-[30px] bg-gradient-to-b from-white to-slate-50 px-6 pb-6 pt-8 text-center shadow-[0_30px_80px_rgba(7,15,32,0.28)]"
+                                  data-form-status-card
+                              >
+                                  <div
+                                      class="mb-6 flex h-32 w-32 items-center justify-center rounded-full bg-blue-500/10 text-blue-600 text-4xl"
+                                      data-form-status-icon
+                                  >
+                                      <div class="flex h-[4.75rem] w-[4.75rem] items-center justify-center rounded-full bg-white text-4xl font-semibold leading-none shadow-[inset_0_0_0_3px_rgba(37,99,235,0.18)]">
+                                          i
+                                      </div>
+                                  </div>
+
+                                  <h3 class="text-lg font-bold uppercase tracking-[0.04em] text-[#20283a]" data-form-status-title>
+                                      Уведомление
+                                  </h3>
+
+                                  <p class="mt-3 text-[0.95rem] leading-7 text-slate-500" data-form-status-text>
+                                      Обрабатываем ваш запрос.
+                                  </p>
+
+                                  <button
+                                      type="button"
+                                      class="mt-6 w-full rounded bg-blue-500 px-4 py-3 text-base font-semibold text-white hover:bg-blue-600 active:bg-blue-700"
+                                      data-form-status-action
+                                  >
+                                      Понятно
+                                  </button>
+                              </article>
+                          </div>
+                      </div>
+                  </div>',
             ],
             [
                 'name' => 'Отзывы',

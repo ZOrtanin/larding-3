@@ -77,6 +77,8 @@ class BlockController extends Controller
             $block->variables()->createMany($customVariables);
         }
 
+        $this->normalizePlacementOrders($placement);
+
         return Redirect::to('/');
     }
 
@@ -132,11 +134,14 @@ class BlockController extends Controller
             'variables.*.required' => ['nullable', 'boolean'],
         ]);
 
+        $originalPlacement = $block->placement;
+        $nextPlacement = $validated['placement'] ?? $block->placement;
+
         $block->update([
             'name' => $validated['name'],
             'description' => $validated['description'] ?? null,
             'blade_template' => $validated['content'],
-            'placement' => $validated['placement'] ?? $block->placement,
+            'placement' => $nextPlacement,
         ]);
 
         $block->variables()
@@ -148,6 +153,20 @@ class BlockController extends Controller
         if ($customVariables !== []) {
             $block->variables()->createMany($customVariables);
         }
+
+        if ($originalPlacement !== $nextPlacement) {
+            $orderVar = $block->variables()->where('name', 'order')->first();
+
+            if ($orderVar) {
+                $orderVar->update([
+                    'default_value' => (string) ($this->maxPlacementOrder($nextPlacement, $block->id) + 1),
+                ]);
+            }
+
+            $this->normalizePlacementOrders($originalPlacement);
+        }
+
+        $this->normalizePlacementOrders($nextPlacement);
 
         return Redirect::to('/');
     }
@@ -161,7 +180,9 @@ class BlockController extends Controller
             ], 422);
         }
 
+        $placement = $block->placement;
         $block->delete();
+        $this->normalizePlacementOrders($placement);
 
         return response()->json([
             'ok' => true,
@@ -208,6 +229,8 @@ class BlockController extends Controller
 
     // Меняет порядок блока местами с соседним блоком в выбранном направлении.
     private function swapBlockOrder(Block $block, string $direction): JsonResponse {
+        $this->normalizePlacementOrders($block->placement);
+
         $currentVar = $block->variables()->where('name', 'order')->first();
         if (! $currentVar) {
             return response()->json(['ok' => false, 'message' => 'Order variable not found'], 404);
@@ -259,6 +282,55 @@ class BlockController extends Controller
             'block_id' => $block->id,
             'order' => (int) $currentVar->default_value,
         ]);
+    }
+
+    private function normalizePlacementOrders(string $placement): void
+    {
+        $blocks = Block::query()
+            ->with('variables')
+            ->where('placement', $placement)
+            ->get()
+            ->sort(function (Block $left, Block $right): int {
+                $leftOrder = (int) optional($left->variables->firstWhere('name', 'order'))->default_value;
+                $rightOrder = (int) optional($right->variables->firstWhere('name', 'order'))->default_value;
+
+                return [$leftOrder, $left->id] <=> [$rightOrder, $right->id];
+            })
+            ->values();
+
+        foreach ($blocks as $index => $placementBlock) {
+            $orderVar = $placementBlock->variables->firstWhere('name', 'order');
+            $nextOrder = (string) ($index + 1);
+
+            if ($orderVar) {
+                if ((string) $orderVar->default_value !== $nextOrder) {
+                    $orderVar->update([
+                        'default_value' => $nextOrder,
+                    ]);
+                }
+
+                continue;
+            }
+
+            $placementBlock->variables()->create([
+                'name' => 'order',
+                'label' => $placementBlock->name,
+                'type' => 'text',
+                'default_value' => $nextOrder,
+                'required' => true,
+            ]);
+        }
+    }
+
+    private function maxPlacementOrder(string $placement, ?int $exceptBlockId = null): int
+    {
+        return Block::query()
+            ->with('variables')
+            ->where('placement', $placement)
+            ->when($exceptBlockId !== null, fn ($query) => $query->where('id', '!=', $exceptBlockId))
+            ->get()
+            ->map(fn (Block $placementBlock) => (int) optional($placementBlock->variables->firstWhere('name', 'order'))->default_value)
+            ->max() ?? 0;
     }
 
     // Подготавливает пользовательские переменные блока к сохранению в базу.

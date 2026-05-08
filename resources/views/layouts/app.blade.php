@@ -9,8 +9,6 @@
 <title>{{ $siteName ?: config('app.name', 'Laravel') }}</title>
 @include('layouts.partials.favicon')
 
-<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
-
 @guest
 {!! preg_replace('/><(link|script)/', '>'."\n".'<$1', app(\Illuminate\Foundation\Vite::class)(['resources/css/site.css', 'resources/js/site.js'])->toHtml()) !!}
 @else
@@ -18,10 +16,8 @@
 @endguest
 {!! $headHtml ?? '' !!}
        
-@if (filled($frontCss ?? ''))
-<style>
-{!! $frontCss !!}
-</style>
+@if (filled($frontCssUrl ?? ''))
+<link rel="stylesheet" href="{{ $frontCssUrl }}">
 @endif
 
     </head>
@@ -32,13 +28,9 @@
             @guest
                 
             @else
-                <link href="{{ asset('js/lib/tempusdominus/css/tempusdominus-bootstrap-4.min.css') }}" rel="stylesheet">
-                <script src="{{ asset('js/lib/tempusdominus/js/moment.min.js') }}" defer></script>
-                <script src="{{ asset('js/lib/tempusdominus/js/moment-timezone.min.js') }}" defer></script>
-                <script src="{{ asset('js/lib/tempusdominus/js/tempusdominus-bootstrap-4.min.js') }}" defer></script>
-
                 <script src="{{ asset('js/lib/chart/chart.min.js') }}" defer></script>
                 <script src="{{ asset('js/admin.js') }}" defer></script>
+                <script src="{{ asset('js/dashboard-calendar.js') }}" defer></script>
                 <input type="hidden" id="url_block_create" value="{{ route('settings.create') }}">
                 <input type="hidden" id="url_block_show" value="{{ route('settings.blocks.show', ['block' => '__BLOCK__']) }}">
                 <input type="hidden" id="url_block_templates" value="{{ route('settings.templates.index') }}">

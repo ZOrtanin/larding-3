@@ -16,6 +16,10 @@ class EnsureApplicationIsNotInstalled
 
     public function handle(Request $request, Closure $next): Response
     {
+        if (! $this->installationState->isInstallerEnabled()) {
+            abort(404);
+        }
+
         if (! $this->installationState->isInstalled()) {
             return $next($request);
         }

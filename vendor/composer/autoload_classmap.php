@@ -57,6 +57,8 @@ return array(
     'App\\Services\\DatabaseConnectionValidator' => $baseDir . '/app/Services/DatabaseConnectionValidator.php',
     'App\\Services\\EnvironmentFileEditor' => $baseDir . '/app/Services/EnvironmentFileEditor.php',
     'App\\Services\\FaviconGenerator' => $baseDir . '/app/Services/FaviconGenerator.php',
+    'App\\Services\\FrontAssetService' => $baseDir . '/app/Services/FrontAssetService.php',
+    'App\\Services\\ImageUploadOptimizer' => $baseDir . '/app/Services/ImageUploadOptimizer.php',
     'App\\Services\\InstallationRunner' => $baseDir . '/app/Services/InstallationRunner.php',
     'App\\Services\\InstallationState' => $baseDir . '/app/Services/InstallationState.php',
     'App\\Services\\LeadMailService' => $baseDir . '/app/Services/LeadMailService.php',

@@ -8,6 +8,14 @@
     RewriteRule ^(app|bootstrap|config|database|resources|routes|storage/framework|storage/logs|vendor)(/|$) - [F,L]
     RewriteRule ^(\.env|artisan|composer\.(json|lock)|package(-lock)?\.json|vite\.config\.js|phpunit\.xml|postcss\.config\.js|tailwind\.config\.js)$ - [F,L]
 
+    RewriteCond %{REQUEST_URI} ^/storage/(.*)$ [NC]
+    RewriteCond %{DOCUMENT_ROOT}/public/storage/%1 -f
+    RewriteRule ^storage/(.*)$ public/storage/$1 [L]
+
+    RewriteCond %{REQUEST_URI} ^/storage/(.*)$ [NC]
+    RewriteCond %{DOCUMENT_ROOT}/storage/app/public/%1 -f
+    RewriteRule ^storage/(.*)$ storage/app/public/$1 [L]
+
     RewriteCond %{REQUEST_URI} ^/(css|js|img|build|storage|system)/(.*)$ [NC]
     RewriteCond %{DOCUMENT_ROOT}/public/%1/%2 -f
     RewriteRule ^(css|js|img|build|storage|system)/(.*)$ public/$1/$2 [L]

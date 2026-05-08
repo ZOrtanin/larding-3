@@ -12,20 +12,20 @@ window.Alpine = Alpine;
 Alpine.start();
 
 document.addEventListener('DOMContentLoaded', function () {
-    initBlockContentEditor();
+    initCodeEditor('block-content', 'larding:block-content-line-wrapping', 'blockContentCodeEditor');
+    initCodeEditor('block-custom-css', 'larding:block-custom-css-line-wrapping', 'blockCssCodeEditor');
 });
 
-function initBlockContentEditor() {
-    const textarea = document.getElementById('block-content');
+function initCodeEditor(textareaId, storageKey, globalName) {
+    const textarea = document.getElementById(textareaId);
     const lineWrappingToggle = document.getElementById('block-content-line-wrapping');
 
     if (!textarea || textarea.dataset.codeEditorReady === '1') {
         return;
     }
 
-    const wrappingStorageKey = 'larding:block-content-line-wrapping';
     const wrappingCompartment = new Compartment();
-    const savedWrapping = window.localStorage.getItem(wrappingStorageKey);
+    const savedWrapping = window.localStorage.getItem(storageKey);
     const lineWrappingEnabled = savedWrapping === null ? true : savedWrapping === '1';
 
     const wrapper = document.createElement('div');
@@ -90,7 +90,7 @@ function initBlockContentEditor() {
                 effects: wrappingCompartment.reconfigure(enabled ? EditorView.lineWrapping : []),
             });
 
-            window.localStorage.setItem(wrappingStorageKey, enabled ? '1' : '0');
+            window.localStorage.setItem(storageKey, enabled ? '1' : '0');
         });
     }
 
@@ -116,7 +116,7 @@ function initBlockContentEditor() {
     });
 
     textarea.dataset.codeEditorReady = '1';
-    window.blockContentCodeEditor = {
+    window[globalName] = {
         sync: syncEditor,
     };
 }

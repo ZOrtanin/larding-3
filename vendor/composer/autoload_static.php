@@ -526,6 +526,8 @@ class ComposerStaticInita604a19f9b48703165d77459ee5cd4fe
         'App\\Services\\DatabaseConnectionValidator' => __DIR__ . '/../..' . '/app/Services/DatabaseConnectionValidator.php',
         'App\\Services\\EnvironmentFileEditor' => __DIR__ . '/../..' . '/app/Services/EnvironmentFileEditor.php',
         'App\\Services\\FaviconGenerator' => __DIR__ . '/../..' . '/app/Services/FaviconGenerator.php',
+        'App\\Services\\FrontAssetService' => __DIR__ . '/../..' . '/app/Services/FrontAssetService.php',
+        'App\\Services\\ImageUploadOptimizer' => __DIR__ . '/../..' . '/app/Services/ImageUploadOptimizer.php',
         'App\\Services\\InstallationRunner' => __DIR__ . '/../..' . '/app/Services/InstallationRunner.php',
         'App\\Services\\InstallationState' => __DIR__ . '/../..' . '/app/Services/InstallationState.php',
         'App\\Services\\LeadMailService' => __DIR__ . '/../..' . '/app/Services/LeadMailService.php',

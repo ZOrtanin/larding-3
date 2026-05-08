@@ -1,4 +1,4 @@
-<x-app-layout :site-name="$site_name" :site-description="$site_description" :head-html="$head_html" :front-css="$front_css" :body-start-html="$body_start_html" :body-end-html="$body_end_html" :front-js="$front_js">
+<x-app-layout :site-name="$site_name" :site-description="$site_description" :head-html="$head_html" :front-css-url="$front_css_url" :body-start-html="$body_start_html" :body-end-html="$body_end_html" :front-js="$front_js">
     @php($hasAssignedRole = (bool) Auth::user()?->role_id)
     @auth
         @if ($hasAssignedRole)

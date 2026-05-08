@@ -26,7 +26,6 @@
     <div class="flex w-full mx-auto pt-6 h-10"></div>
 
 <link href="{{ asset('js/lib/tempusdominus/css/tempusdominus-bootstrap-4.min.css') }}" rel="stylesheet">
-<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
 <script src="{{ asset('js/lib/tempusdominus/js/moment.min.js') }}" defer></script>
 <script src="{{ asset('js/lib/tempusdominus/js/moment-timezone.min.js') }}" defer></script>
 <script src="{{ asset('js/lib/tempusdominus/js/tempusdominus-bootstrap-4.min.js') }}" defer></script>

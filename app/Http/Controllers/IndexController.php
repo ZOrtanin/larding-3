@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Setting;
+use App\Services\FrontAssetService;
 use App\Services\PageBlockService;
 use App\Services\PageRenderService;
 use Illuminate\Http\Request;
@@ -11,6 +12,7 @@ use Illuminate\View\View;
 class IndexController extends Controller
 {
     public function __construct(
+        private readonly FrontAssetService $frontAssetService,
         private readonly PageBlockService $pageBlockService,
         private readonly PageRenderService $pageRenderService,
     ) {
@@ -41,6 +43,15 @@ class IndexController extends Controller
         $renderedBodyEndBlocks = $this->pageRenderService->renderRaw($bodyEndBlocks, $data);
         $renderedFrontCssBlocks = $this->pageRenderService->renderRaw($frontCssBlocks, $data);
         $renderedFrontJsBlocks = $this->pageRenderService->renderRaw($frontJsBlocks, $data);
+        $renderedBlockCss = $this->pageRenderService->renderRaw(
+            $sortedBlocks
+                ->map(fn (array $block) => [...$block, 'data' => $block['custom_css'] ?? ''])
+                ->filter(fn (array $block) => trim((string) ($block['data'] ?? '')) !== ''),
+            $data
+        );
+        $frontCssUrl = $this->frontAssetService->publishFrontCss(
+            trim($renderedFrontCssBlocks."\n".$renderedBlockCss)
+        );
 
         $siteName = Setting::getValue('site_name', 'Супер сайт') ?? 'Супер сайт';
         $siteDescription = Setting::getValue('site_description', '') ?? '';
@@ -54,7 +65,7 @@ class IndexController extends Controller
             'title' => 'WORKED',
             'block' => $renderedBlock,
             'head_html' => $renderedHeadBlocks,
-            'front_css' => $renderedFrontCssBlocks,
+            'front_css_url' => $frontCssUrl,
             'body_start_html' => $renderedBodyStartBlocks,
             'body_end_html' => $renderedBodyEndBlocks,
             'front_js' => $renderedFrontJsBlocks,

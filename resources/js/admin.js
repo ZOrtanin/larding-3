@@ -16,20 +16,53 @@ if (!window.__lardingAlpineStarted) {
 }
 
 document.addEventListener('DOMContentLoaded', function () {
-    initBlockContentEditor();
+    initAdminScrollRestore();
+    initCodeEditor('block-content', 'larding:block-content-line-wrapping', 'blockContentCodeEditor');
+    initCodeEditor('block-custom-css', 'larding:block-custom-css-line-wrapping', 'blockCssCodeEditor');
+    initBlockEditorTabs();
 });
 
-function initBlockContentEditor() {
-    const textarea = document.getElementById('block-content');
+function initAdminScrollRestore() {
+    const storageKey = 'larding:admin-scroll:' + window.location.pathname + window.location.search;
+    const savedScrollY = Number.parseInt(window.sessionStorage.getItem(storageKey) || '', 10);
+
+    if (Number.isFinite(savedScrollY) && savedScrollY > 0) {
+        window.requestAnimationFrame(function () {
+            window.scrollTo({
+                top: savedScrollY,
+                left: 0,
+                behavior: 'auto',
+            });
+        });
+    }
+
+    let saveTimeoutId = null;
+
+    function persistScrollPosition() {
+        window.sessionStorage.setItem(storageKey, String(Math.round(window.scrollY)));
+    }
+
+    window.addEventListener('scroll', function () {
+        if (saveTimeoutId !== null) {
+            window.clearTimeout(saveTimeoutId);
+        }
+
+        saveTimeoutId = window.setTimeout(persistScrollPosition, 80);
+    }, { passive: true });
+
+    window.addEventListener('beforeunload', persistScrollPosition);
+}
+
+function initCodeEditor(textareaId, storageKey, globalName) {
+    const textarea = document.getElementById(textareaId);
     const lineWrappingToggle = document.getElementById('block-content-line-wrapping');
 
     if (!textarea || textarea.dataset.codeEditorReady === '1') {
         return;
     }
 
-    const wrappingStorageKey = 'larding:block-content-line-wrapping';
     const wrappingCompartment = new Compartment();
-    const savedWrapping = window.localStorage.getItem(wrappingStorageKey);
+    const savedWrapping = window.localStorage.getItem(storageKey);
     const lineWrappingEnabled = savedWrapping === null ? true : savedWrapping === '1';
 
     const wrapper = document.createElement('div');
@@ -94,7 +127,7 @@ function initBlockContentEditor() {
                 effects: wrappingCompartment.reconfigure(enabled ? EditorView.lineWrapping : []),
             });
 
-            window.localStorage.setItem(wrappingStorageKey, enabled ? '1' : '0');
+            window.localStorage.setItem(storageKey, enabled ? '1' : '0');
         });
     }
 
@@ -120,7 +153,37 @@ function initBlockContentEditor() {
     });
 
     textarea.dataset.codeEditorReady = '1';
-    window.blockContentCodeEditor = {
+    window[globalName] = {
         sync: syncEditor,
     };
+}
+
+function initBlockEditorTabs() {
+    const tabs = document.querySelectorAll('.block-editor-tab');
+    const panes = document.querySelectorAll('.block-editor-pane');
+
+    if (!tabs.length || !panes.length) {
+        return;
+    }
+
+    function activateTab(tabName) {
+        tabs.forEach(function (tab) {
+            const isActive = tab.dataset.editorTab === tabName;
+            tab.classList.toggle('bg-orange-500', isActive);
+            tab.classList.toggle('text-white', isActive);
+            tab.classList.toggle('text-gray-300', !isActive);
+        });
+
+        panes.forEach(function (pane) {
+            pane.classList.toggle('hidden', pane.id !== 'block-editor-pane-' + tabName);
+        });
+    }
+
+    tabs.forEach(function (tab) {
+        tab.addEventListener('click', function () {
+            activateTab(tab.dataset.editorTab || 'html');
+        });
+    });
+
+    activateTab('html');
 }

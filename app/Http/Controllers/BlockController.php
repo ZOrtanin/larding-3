@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Validation\ValidationException;
 
 class BlockController extends Controller
 {
@@ -18,11 +19,12 @@ class BlockController extends Controller
     private const SYSTEM_VARIABLE_NAMES = ['order', 'visibility'];
 
     // Создаёт новый блок страницы вместе с системными и пользовательскими переменными.
-    public function create(Request $request): RedirectResponse {
+    public function create(Request $request): RedirectResponse|JsonResponse {
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
             'content' => ['required', 'string'],
+            'custom_css' => ['nullable', 'string'],
             'placement' => ['nullable', 'in:'.implode(',', Block::PLACEMENTS)],
             'variables' => ['nullable', 'array'],
             'variables.*.name' => ['nullable', 'string', 'max:255'],
@@ -51,6 +53,7 @@ class BlockController extends Controller
             'name' => $name,
             'description' => $description,
             'blade_template' => $content,
+            'custom_css' => $validated['custom_css'] ?? null,
             'placement' => $placement,
         ]);
 
@@ -79,6 +82,26 @@ class BlockController extends Controller
 
         $this->normalizePlacementOrders($placement);
 
+        if ($request->expectsJson()) {
+            return response()->json([
+                'ok' => true,
+                'message' => 'Блок сохранён.',
+                'block' => [
+                    'id' => $block->id,
+                    'name' => $block->name,
+                    'description' => $block->description,
+                    'content' => $block->blade_template,
+                    'custom_css' => $block->custom_css,
+                    'placement' => $block->placement,
+                    'is_system' => $block->is_system,
+                    'variables' => $block->variables()
+                        ->whereNotIn('name', self::SYSTEM_VARIABLE_NAMES)
+                        ->orderBy('id')
+                        ->get(['name', 'label', 'type', 'default_value', 'required']),
+                ],
+            ]);
+        }
+
         return Redirect::to('/');
     }
 
@@ -89,6 +112,7 @@ class BlockController extends Controller
             'name' => $block->name,
             'description' => $block->description,
             'content' => $block->blade_template,
+            'custom_css' => $block->custom_css,
             'placement' => $block->placement,
             'is_system' => $block->is_system,
             'variables' => $block->variables()
@@ -116,15 +140,17 @@ class BlockController extends Controller
             'slug' => $blockTemplate->slug,
             'description' => $blockTemplate->description,
             'content' => $blockTemplate->blade_template,
+            'custom_css' => $blockTemplate->custom_css,
         ]);
     }
 
     // Обновляет блок страницы и пересоздаёт его пользовательские переменные.
-    public function update(Request $request, Block $block): RedirectResponse {
+    public function update(Request $request, Block $block): RedirectResponse|JsonResponse {
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
             'content' => ['required', 'string'],
+            'custom_css' => ['nullable', 'string'],
             'placement' => ['nullable', 'in:'.implode(',', Block::PLACEMENTS)],
             'variables' => ['nullable', 'array'],
             'variables.*.name' => ['nullable', 'string', 'max:255'],
@@ -141,6 +167,7 @@ class BlockController extends Controller
             'name' => $validated['name'],
             'description' => $validated['description'] ?? null,
             'blade_template' => $validated['content'],
+            'custom_css' => $validated['custom_css'] ?? null,
             'placement' => $nextPlacement,
         ]);
 
@@ -167,6 +194,26 @@ class BlockController extends Controller
         }
 
         $this->normalizePlacementOrders($nextPlacement);
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'ok' => true,
+                'message' => 'Блок сохранён.',
+                'block' => [
+                    'id' => $block->id,
+                    'name' => $block->name,
+                    'description' => $block->description,
+                    'content' => $block->blade_template,
+                    'custom_css' => $block->custom_css,
+                    'placement' => $block->placement,
+                    'is_system' => $block->is_system,
+                    'variables' => $block->variables()
+                        ->whereNotIn('name', self::SYSTEM_VARIABLE_NAMES)
+                        ->orderBy('id')
+                        ->get(['name', 'label', 'type', 'default_value', 'required']),
+                ],
+            ]);
+        }
 
         return Redirect::to('/');
     }

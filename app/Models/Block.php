@@ -27,6 +27,7 @@ class Block extends Model
         'name',
         'description',
         'blade_template',
+        'custom_css',
         'placement',
         'is_system',
     ];

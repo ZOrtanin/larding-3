@@ -250,16 +250,65 @@
 
                 </div>
                 <div class="bg-white rounded-lg dark:bg-gray-800 h-90 p-6">
-                    <h2 class="mb-6">Календарь событий</h2>
-                    <div id="calender"></div>
+                    <div class="mb-4 flex items-center justify-between gap-3">
+                        <h2>Календарь событий</h2>
+                        <button
+                            id="calendar-today-button"
+                            type="button"
+                            class="rounded-full border border-white/10 px-3 py-1 text-xs font-medium text-gray-300 transition hover:border-orange-500/50 hover:text-white"
+                        >
+                            Сегодня
+                        </button>
+                    </div>
+                    <div
+                        id="calender"
+                        data-leads='@json($leadCalendarMap)'
+                        class="rounded-2xl border border-white/10 bg-gray-900/40 p-4"
+                    >
+                        <div class="mb-4 flex items-center justify-between gap-3">
+                            <button
+                                id="calendar-prev-button"
+                                type="button"
+                                class="calendar-nav-button"
+                                aria-label="Предыдущий месяц"
+                            ></button>
+                            <div id="calendar-current-label" class="text-sm font-semibold uppercase tracking-[0.18em] text-white"></div>
+                            <button
+                                id="calendar-next-button"
+                                type="button"
+                                class="calendar-nav-button"
+                                aria-label="Следующий месяц"
+                            ></button>
+                        </div>
+                        <div id="calendar-weekdays" class="mb-3 grid grid-cols-7 gap-2"></div>
+                        <div id="calendar-grid" class="grid grid-cols-7 gap-2"></div>
+                    </div>
+                    <div id="calendar-leads-panel" class="mt-5 rounded-xl border border-white/10 bg-gray-900/40 p-4">
+                        <div id="calendar-leads-title" class="text-sm font-medium text-white">
+                            Выберите день
+                        </div>
+                        <div id="calendar-leads-empty" class="mt-2 text-sm text-gray-400">
+                            Нажмите на дату в календаре, чтобы посмотреть лиды.
+                        </div>
+                        <ul id="calendar-leads-list" class="mt-3 hidden space-y-2"></ul>
+                    </div>
                 </div>
                 <div class="bg-white rounded-lg dark:bg-gray-800 h-90 ">
-                    <h2 class="mb-6 p-6">График посещений</h2>
+                    <div class="flex items-center justify-between gap-4 p-6 pb-0">
+                        <h2 class="mb-6">График посещений</h2>
+                        <select
+                            id="visits-chart-metric"
+                            class="mb-6 rounded-full border border-white/10 bg-gray-900 px-4 py-2 text-sm text-gray-200 focus:border-orange-500 focus:outline-none"
+                        >
+                            <option value="visits">Посещения</option>
+                            <option value="refreshes">Обновления страниц</option>
+                            <option value="leads">Лиды</option>
+                        </select>
+                    </div>
                     <div class="px-6 pb-6">
                         <canvas
                             id="visits-chart"
-                            data-labels='@json($visitsChart->pluck("label"))'
-                            data-values='@json($visitsChart->pluck("value"))'
+                            data-series='@json($visitsChartSeries)'
                             height="260"
                         ></canvas>
                     </div>

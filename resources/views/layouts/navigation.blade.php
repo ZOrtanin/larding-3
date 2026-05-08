@@ -68,69 +68,87 @@
                       <div class="px-4 sm:px-6">
                         <h2 id="drawer-title" class="text-base font-semibold text-white">Добавить блок</h2>
                       </div>
+
                       <div class="relative mt-6 flex-1 px-4 sm:px-6">
                         <form id="send-verification" method="post" action="{{ route('verification.send') }}">
                             @csrf
                         </form>
-                        <form id="block-form" action="{{ route('settings.create') }}" method="POST">
+                        <form id="block-form" action="{{ route('settings.create') }}" method="POST" >
                             @csrf
                             <input id="block-form-method" type="hidden" name="_method" value="PATCH">
-                        
 
-
-                         
-                            <div class="sm:col-span-3 mb-3">
-                              <label for="block-template-select" class="block text-sm/6 font-medium text-white">Шаблон блока</label>
-                              <div class="mt-2 flex items-center gap-2">
-                                <select id="block-template-select" class="block w-full rounded-md bg-white/5 px-3 py-1.5 text-base text-white outline-1 -outline-offset-1 outline-white/10 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6">
-                                  <option value="">Выберите шаблон</option>
-                                </select>
-                                <button id="block-template-apply" type="button" class="inline-flex rounded-md bg-gray-700 px-3 py-1.5 text-sm font-medium text-white hover:bg-gray-600">Применить</button>
+                            <!-- Имя блока -->
+                            <div id="block-editor-main-fields" class="mb-3 grid grid-cols-1 gap-3">
+                              <div class="min-w-0">
+                                <label for="block-name" class="block text-sm/6 font-medium text-white">Имя блока</label>
+                                <div class="mt-2">
+                                  <input id="block-name" type="text" name="name" autocomplete="given-name" class="block w-full rounded-md bg-white/5 px-3 py-1.5 text-base text-white outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6" />
+                                </div>
                               </div>
-                              <p class="mt-2 text-xs text-gray-400">Подставляет название, описание и контент в форму.</p>
-                            </div>
 
-                            <div class="sm:col-span-3 mb-3">
-                              <label for="block-name" class="block text-sm/6 font-medium text-white">Имя блока</label>
-                              <div class="mt-2">
-                                <input id="block-name" type="text" name="name" autocomplete="given-name" class="block w-full rounded-md bg-white/5 px-3 py-1.5 text-base text-white outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6" />
+                              <div class="min-w-0">
+                                <label for="block-description" class="block text-sm/6 font-medium text-white">Описание блока</label>
+                                <div class="mt-2">
+                                  <input id="block-description" type="text" name="description" autocomplete="given-description" class="block w-full rounded-md bg-white/5 px-3 py-1.5 text-base text-white outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6" />
+                                </div>
                               </div>
                             </div>
 
-                            <div class="sm:col-span-3 mb-3">
-                              <label for="block-description" class="block text-sm/6 font-medium text-white">Описание блока</label>
-                              <div class="mt-2">
-                                <input id="block-description" type="text" name="description" autocomplete="given-description" class="block w-full rounded-md bg-white/5 px-3 py-1.5 text-base text-white outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6" />
-                              </div>
-                            </div>
-
-                            <div class="sm:col-span-3 mb-3">
-                              <label for="block-placement" class="block text-sm/6 font-medium text-white">Место вывода</label>
-                              <div class="mt-2">
-                                <select id="block-placement" name="placement" class="block w-full rounded-md bg-gray-800 px-3 py-1.5 text-base text-white outline-1 -outline-offset-1 outline-white/10 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6">
-                                  <option value="content">content</option>
-                                  <option value="head">head</option>
-                                  <option value="body_start">body_start</option>
-                                  <option value="body_end">body_end</option>
-                                  <option value="front_css">front_css</option>
-                                  <option value="front_js">front_js</option>
-                                </select>
-                              </div>
-                              <p class="mt-2 text-xs text-gray-400">Системные layout-блоки редактируются здесь же, но удалить их нельзя.</p>
-                            </div>
-
+                            
                             <div class="col-span-full mb-3">
-                              <div class="flex items-center justify-between gap-4">
-                                <label for="block-content" class="block text-sm/6 font-medium text-white">Контент</label>
+                              <label for="block-content" class="block text-sm/6 font-medium text-white">Редактор</label>
+                              <div class="flex flex-wrap items-center justify-between gap-4">
+                                <div class="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 p-1">
+                                  <button type="button" data-editor-tab="html" class="block-editor-tab inline-flex rounded-lg bg-orange-500 px-3 py-1.5 text-sm font-medium text-white transition">HTML</button>
+                                  <button type="button" data-editor-tab="css" class="block-editor-tab inline-flex rounded-lg px-3 py-1.5 text-sm font-medium text-gray-300 transition hover:text-white">CSS</button>
+                                </div>
                                 <label class="inline-flex items-center gap-2 text-xs text-gray-300">
                                   <input id="block-content-line-wrapping" type="checkbox" class="rounded border-white/10 bg-white/5 text-orange-500 focus:ring-orange-500" checked />
                                   Перенос строк
                                 </label>
                               </div>
-                              <div class="mt-2">
-                                <textarea id="block-content" name="content" rows="13" class="block w-full rounded-md bg-white/5 px-3 py-1.5 text-base text-white outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6"></textarea>
+                              <div id="block-editor-pane-html" class="block-editor-pane mt-3">
+                                <label for="block-content" class="block text-sm/6 font-medium text-white">HTML контент</label>
+                                <div class="mt-2">
+                                  <textarea id="block-content" name="content" rows="13" class="block w-full rounded-md bg-white/5 px-3 py-1.5 text-base text-white outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6"></textarea>
+                                </div>
+                                <p class="mt-3 text-sm/6 text-gray-400">HTML шаблон блока.</p>
                               </div>
-                              <p class="mt-3 text-sm/6 text-gray-400">Write a few sentences about yourself.</p>
+                              <div id="block-editor-pane-css" class="block-editor-pane mt-3 hidden">
+                                <label for="block-custom-css" class="block text-sm/6 font-medium text-white">CSS блока</label>
+                                <div class="mt-2">
+                                  <textarea id="block-custom-css" name="custom_css" rows="13" class="block w-full rounded-md bg-white/5 px-3 py-1.5 text-base text-white outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6"></textarea>
+                                </div>
+                                <p class="mt-3 text-sm/6 text-gray-400">Эти стили будут собраны в общий файл <code class="text-gray-200">front-custom.css</code>.</p>
+                              </div>
+                            </div>
+
+                            <div id="block-editor-meta-fields" class="mb-3 grid grid-cols-1 gap-3">
+                              <div class="min-w-0">
+                                <label for="block-placement" class="block text-sm/6 font-medium text-white">Место вывода</label>
+                                <div class="mt-2">
+                                  <select id="block-placement" name="placement" class="block w-full rounded-md bg-gray-800 px-3 py-1.5 text-base text-white outline-1 -outline-offset-1 outline-white/10 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6">
+                                    <option value="content">content</option>
+                                    <option value="head">head</option>
+                                    <option value="body_start">body_start</option>
+                                    <option value="body_end">body_end</option>
+                                    <option value="front_css">front_css</option>
+                                    <option value="front_js">front_js</option>
+                                  </select>
+                                </div>
+                                <p class="mt-2 text-xs text-gray-400">Системные layout-блоки редактируются здесь же, но удалить их нельзя.</p>
+                              </div>
+
+                              <div class="min-w-0">
+                                <label for="block-template-select" class="block text-sm/6 font-medium text-white">Шаблон блока</label>
+                                <div class="mt-2 flex items-center gap-2">
+                                  <select id="block-template-select" class="block w-full rounded-md bg-white/5 px-3 py-1.5 text-base text-white outline-1 -outline-offset-1 outline-white/10 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6">
+                                    <option value="">Выберите шаблон</option>
+                                  </select>
+                                  <button id="block-template-apply" type="button" class="inline-flex rounded-md bg-gray-700 px-3 py-1.5 text-sm font-medium text-white hover:bg-gray-600">Применить</button>
+                                </div>
+                                <p class="mt-2 text-xs text-gray-400">Подставляет название, описание и контент в форму.</p>
+                              </div>
                             </div>
 
                             <div class="col-span-full mt-6">
@@ -147,7 +165,9 @@
                         <div class="mt-4 flex items-center gap-3">
                           <button id="block-submit-button" type="submit" class="inline-flex rounded-xl bg-orange-500 text-gray-50 hover:text-white focus:outline-2 focus:outline-offset-2 focus:outline-indigo-500 h-10 p-1 px-3 my-auto font-medium text-sm items-center">+ Добавить блок</button>
                           <button id="block-delete-button" type="button" class="hidden inline-flex rounded-xl bg-red-600 text-gray-50 hover:text-white focus:outline-2 focus:outline-offset-2 focus:outline-indigo-500 h-10 p-1 px-3 my-auto font-medium text-sm items-center">Удалить блок</button>
+                          <p id="block-form-status" class="mt-3 text-sm text-red-400"></p>
                         </div>
+                        
                         </form>
 
                         <template id="block-variable-template">

@@ -10,6 +10,7 @@ use Throwable;
 class InstallationState
 {
     public const INSTALLED_KEY = 'app.installed';
+    public const INSTALLER_FORCE_ENABLE_ENV = 'INSTALLER_FORCE_ENABLE';
 
     public function isInstalled(): bool
     {
@@ -26,5 +27,14 @@ class InstallationState
         } catch (QueryException|Throwable) {
             return false;
         }
+    }
+
+    public function isInstallerEnabled(): bool
+    {
+        if (! $this->isInstalled()) {
+            return true;
+        }
+
+        return filter_var(env(self::INSTALLER_FORCE_ENABLE_ENV, false), FILTER_VALIDATE_BOOL);
     }
 }

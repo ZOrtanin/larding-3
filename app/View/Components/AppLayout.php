@@ -15,7 +15,7 @@ class AppLayout extends Component
         public ?string $siteName = null,
         public ?string $siteDescription = null,
         public ?string $headHtml = null,
-        public ?string $frontCss = null,
+        public ?string $frontCssUrl = null,
         public ?string $bodyStartHtml = null,
         public ?string $bodyEndHtml = null,
         public ?string $frontJs = null,

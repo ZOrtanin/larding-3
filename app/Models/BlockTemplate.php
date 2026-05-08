@@ -11,6 +11,7 @@ class BlockTemplate extends Model
         'slug',
         'description',
         'blade_template',
+        'custom_css',
         'preview_image',
         'is_active',
     ];
@@ -19,4 +20,3 @@ class BlockTemplate extends Model
         'is_active' => 'boolean',
     ];
 }
-

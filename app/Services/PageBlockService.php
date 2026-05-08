@@ -31,6 +31,7 @@ class PageBlockService
                     'is_system' => $block->is_system,
                     'is_visible' => $isVisible === '1',
                     'data' => $block->blade_template,
+                    'custom_css' => $block->custom_css ?? '',
                 ];
             })
             ->sortBy('my_id')

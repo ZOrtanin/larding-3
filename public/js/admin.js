@@ -1,14 +1,3 @@
-(function ($) {
-    "use strict";
-
-    // Календарь на dashboard.
-    $('#calender').datetimepicker({
-        inline: true,
-        format: 'L'
-    });
-})(jQuery);
-
-
 document.addEventListener('DOMContentLoaded', function () {
     initBlockEditor();
     initLeadTableActions();
@@ -171,16 +160,25 @@ function initUserPasswordGenerator() {
 
 function initVisitsChart() {
     const chartElement = document.getElementById('visits-chart');
+    const metricSelect = document.getElementById('visits-chart-metric');
 
     if (!chartElement || typeof Chart === 'undefined') {
         return;
     }
 
-    const labels = JSON.parse(chartElement.dataset.labels || '[]');
-    const values = JSON.parse(chartElement.dataset.values || '[]');
+    let seriesMap = {};
+
+    try {
+        seriesMap = JSON.parse(chartElement.dataset.series || '{}');
+    } catch (error) {
+        seriesMap = {};
+    }
+
+    const selectedMetric = metricSelect?.value || 'visits';
+    const initialSeries = seriesMap[selectedMetric] || seriesMap.visits;
     const context = chartElement.getContext('2d');
 
-    if (!context) {
+    if (!context || !initialSeries) {
         return;
     }
 
@@ -188,13 +186,13 @@ function initVisitsChart() {
     gradient.addColorStop(0, 'rgba(249, 115, 22, 0.35)');
     gradient.addColorStop(1, 'rgba(249, 115, 22, 0.02)');
 
-    new Chart(context, {
+    const chart = new Chart(context, {
         type: 'line',
         data: {
-            labels: labels,
+            labels: initialSeries.labels || [],
             datasets: [{
-                label: 'Посещения',
-                data: values,
+                label: initialSeries.label || 'Посещения',
+                data: initialSeries.values || [],
                 borderColor: '#f97316',
                 backgroundColor: gradient,
                 fill: true,
@@ -236,6 +234,23 @@ function initVisitsChart() {
                 },
             },
         },
+    });
+
+    if (!metricSelect) {
+        return;
+    }
+
+    metricSelect.addEventListener('change', function () {
+        const nextSeries = seriesMap[metricSelect.value];
+
+        if (!nextSeries) {
+            return;
+        }
+
+        chart.data.labels = nextSeries.labels || [];
+        chart.data.datasets[0].label = nextSeries.label || 'Посещения';
+        chart.data.datasets[0].data = nextSeries.values || [];
+        chart.update();
     });
 }
 
@@ -290,25 +305,29 @@ function initBlockEditor() {
     const drawerCloseButton = document.getElementById('drawer-close-button');
     const submitButton = document.getElementById('block-submit-button');
     const deleteDrawerButton = document.getElementById('block-delete-button');
+    const formStatus = document.getElementById('block-form-status');
     const templateSelect = document.getElementById('block-template-select');
     const templateApplyButton = document.getElementById('block-template-apply');
     const blockPickerSelect = document.getElementById('block-picker-select');
     const blockPickerOpenButton = document.getElementById('block-picker-open');
     const methodInput = document.getElementById('block-form-method');
+    const mainFieldsGrid = document.getElementById('block-editor-main-fields');
+    const metaFieldsGrid = document.getElementById('block-editor-meta-fields');
     const nameInput = document.getElementById('block-name');
     const descriptionInput = document.getElementById('block-description');
     const placementInput = document.getElementById('block-placement');
     const contentInput = document.getElementById('block-content');
+    const cssInput = document.getElementById('block-custom-css');
     const variablesList = document.getElementById('block-variables-list');
     const variableTemplate = document.getElementById('block-variable-template');
     const addVariableButton = document.getElementById('block-variable-add');
     const addBlockButtons = document.querySelectorAll('.js-add-block-button');
 
-    if (!blockForm || !drawer || !drawerTitle || !submitButton || !methodInput || !nameInput || !descriptionInput || !placementInput || !contentInput) {
+    if (!blockForm || !drawer || !drawerTitle || !submitButton || !methodInput || !nameInput || !descriptionInput || !placementInput || !contentInput || !cssInput) {
         return;
     }
 
-    initBlockEditorResize(drawerPanel, resizeHandle);
+    initBlockEditorResize(drawerPanel, resizeHandle, [mainFieldsGrid, metaFieldsGrid]);
 
     function openDrawer() {
         if (typeof drawer.showModal === 'function' && !drawer.open) {
@@ -332,6 +351,28 @@ function initBlockEditor() {
     const visibilityActionTemplate = document.getElementById('url_block_visibility').value;
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
     let selectedBlockId = null;
+    let isSaving = false;
+
+    function setFormStatus(message, tone = 'neutral') {
+        if (!formStatus) {
+            return;
+        }
+
+        formStatus.textContent = message;
+        formStatus.classList.remove('hidden', 'text-green-400', 'text-red-400', 'text-gray-400');
+
+        if (tone === 'success') {
+            formStatus.classList.add('text-green-400');
+            return;
+        }
+
+        if (tone === 'error') {
+            formStatus.classList.add('text-red-400');
+            return;
+        }
+
+        formStatus.classList.add('text-gray-400');
+    }
 
     function buildUrl(routeTemplate, placeholder, value) {
         return routeTemplate.replace(/\\\//g, '/').replace(placeholder, String(value));
@@ -453,8 +494,12 @@ function initBlockEditor() {
         descriptionInput.value = block.description ?? '';
         placementInput.value = block.placement ?? 'content';
         contentInput.value = block.content ?? '';
+        cssInput.value = block.custom_css ?? '';
         contentInput.dispatchEvent(new CustomEvent('block-editor:update', {
             detail: { value: contentInput.value },
+        }));
+        cssInput.dispatchEvent(new CustomEvent('block-editor:update', {
+            detail: { value: cssInput.value },
         }));
         fillVariables(block.variables ?? []);
     }
@@ -465,6 +510,10 @@ function initBlockEditor() {
         blockForm.action = options.action;
         methodInput.value = 'PATCH';
         selectedBlockId = options.blockId ?? null;
+        setFormStatus('', 'neutral');
+        if (formStatus) {
+            formStatus.classList.add('hidden');
+        }
 
         fillBlockForm(options.block ?? {});
 
@@ -485,6 +534,7 @@ function initBlockEditor() {
                 description: '',
                 placement: 'content',
                 content: '',
+                custom_css: '',
                 variables: [],
             },
         });
@@ -637,6 +687,61 @@ function initBlockEditor() {
         });
     }
 
+    blockForm.addEventListener('submit', async function (event) {
+        event.preventDefault();
+
+        if (isSaving) {
+            return;
+        }
+
+        isSaving = true;
+        submitButton.disabled = true;
+        setFormStatus('Сохраняем блок...', 'neutral');
+
+        try {
+            const formData = new FormData(blockForm);
+            const response = await request(blockForm.action, {
+                method: 'POST',
+                headers: {
+                    Accept: 'application/json',
+                },
+                body: formData,
+            });
+
+            const payload = await response.json().catch(() => null);
+
+            if (!response.ok) {
+                if (response.status === 422 && payload?.errors) {
+                    const firstError = Object.values(payload.errors).flat()[0] || 'Проверьте форму и попробуйте снова.';
+                    setFormStatus(String(firstError), 'error');
+                } else {
+                    setFormStatus(payload?.message || 'Не удалось сохранить блок.', 'error');
+                }
+
+                return;
+            }
+
+            const savedBlock = payload?.block;
+
+            if (savedBlock?.id) {
+                setDrawerMode({
+                    title: 'Редактировать блок',
+                    submitText: 'Сохранить изменения',
+                    action: buildUrl(showActionTemplate, '__BLOCK__', savedBlock.id),
+                    blockId: String(savedBlock.id),
+                    block: savedBlock,
+                });
+            }
+
+            setFormStatus(payload?.message || 'Блок сохранён.', 'success');
+        } catch (error) {
+            setFormStatus('Ошибка сети при сохранении блока.', 'error');
+        } finally {
+            isSaving = false;
+            submitButton.disabled = false;
+        }
+    });
+
     if (drawerCloseButton) {
         drawerCloseButton.addEventListener('click', closeDrawer);
     }
@@ -709,7 +814,7 @@ function initBlockEditor() {
     loadTemplates();
 }
 
-function initBlockEditorResize(drawerPanel, resizeHandle) {
+function initBlockEditorResize(drawerPanel, resizeHandle, responsiveGrids = []) {
     if (!drawerPanel || !resizeHandle) {
         return;
     }
@@ -735,8 +840,20 @@ function initBlockEditorResize(drawerPanel, resizeHandle) {
         drawerPanel.style.width = normalizedWidth + 'px';
     }
 
+    function syncMainFieldsLayout() {
+        const panelWidth = drawerPanel.getBoundingClientRect().width;
+        responsiveGrids.forEach(function (grid) {
+            if (!grid) {
+                return;
+            }
+
+            grid.classList.toggle('grid-cols-2', panelWidth >= 760);
+        });
+    }
+
     const storedWidth = Number.parseInt(window.localStorage.getItem(storageKey) || '', 10);
     applyWidth(Number.isFinite(storedWidth) ? storedWidth : defaultWidth);
+    syncMainFieldsLayout();
 
     function startResize(event) {
         if (event.button !== undefined && event.button !== 0) {
@@ -763,6 +880,7 @@ function initBlockEditorResize(drawerPanel, resizeHandle) {
 
         const width = window.innerWidth - event.clientX;
         applyWidth(width);
+        syncMainFieldsLayout();
     });
 
     function stopResize(event) {
@@ -794,7 +912,13 @@ function initBlockEditorResize(drawerPanel, resizeHandle) {
     window.addEventListener('resize', function () {
         const currentWidth = drawerPanel.getBoundingClientRect().width || defaultWidth;
         applyWidth(currentWidth);
+        syncMainFieldsLayout();
     });
+
+    if (typeof ResizeObserver !== 'undefined') {
+        const resizeObserver = new ResizeObserver(syncMainFieldsLayout);
+        resizeObserver.observe(drawerPanel);
+    }
 }
 
 function initDataModal(config) {

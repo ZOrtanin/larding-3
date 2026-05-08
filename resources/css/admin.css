@@ -3,3 +3,123 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+#calender {
+    color: #e5e7eb;
+}
+
+.calendar-nav-button {
+    position: relative;
+    width: 2.5rem;
+    height: 2.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 9999px;
+    background: rgba(17, 24, 39, 0.7);
+    transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.calendar-nav-button:hover {
+    border-color: rgba(249, 115, 22, 0.45);
+    background: rgba(31, 41, 55, 0.95);
+}
+
+.calendar-nav-button::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0.65rem;
+    height: 0.65rem;
+    border-top: 2px solid #f9fafb;
+    border-right: 2px solid #f9fafb;
+}
+
+#calendar-prev-button::before {
+    transform: translate(-35%, -50%) rotate(-135deg);
+}
+
+#calendar-next-button::before {
+    transform: translate(-65%, -50%) rotate(45deg);
+}
+
+.calendar-weekday {
+    text-align: center;
+    color: #94a3b8;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.calendar-day {
+    position: relative;
+    min-height: 2.7rem;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 1rem;
+    background: rgba(15, 23, 42, 0.75);
+    color: #e5e7eb;
+    transition: border-color 0.2s ease, background-color 0.2s ease, transform 0.2s ease;
+}
+
+.calendar-day:hover {
+    border-color: rgba(249, 115, 22, 0.4);
+    background: rgba(30, 41, 59, 0.95);
+    transform: translateY(-1px);
+}
+
+.calendar-day.is-outside-month {
+    color: #64748b;
+    background: rgba(15, 23, 42, 0.35);
+}
+
+.calendar-day.is-today {
+    box-shadow: inset 0 0 0 1px rgba(249, 115, 22, 0.7);
+}
+
+.calendar-day.is-selected {
+    border-color: rgba(249, 115, 22, 0.8);
+    background: rgba(249, 115, 22, 0.18);
+    color: #ffffff;
+}
+
+.calendar-day.has-leads:not(.is-selected) {
+    box-shadow: inset 0 0 0 1px rgba(249, 115, 22, 0.55);
+}
+
+.calendar-day-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding-top: 0.1rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.calendar-day.has-leads::after {
+    content: attr(data-leads-count);
+    position: absolute;
+    right: 0.35rem;
+    bottom: 0.2rem;
+    min-width: 1.1rem;
+    height: 1.1rem;
+    padding: 0 0.2rem;
+    border-radius: 9999px;
+    background: #f97316;
+    color: #ffffff;
+    font-size: 0.625rem;
+    font-weight: 700;
+    line-height: 1.1rem;
+    text-align: center;
+}
+
+.calendar-day.is-selected.has-leads::after {
+    background: #ffffff;
+    color: #f97316;
+}
+
+#calendar-leads-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
